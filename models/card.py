@@ -12,3 +12,6 @@ class Card:
 
     def __str__(self):
         return f"{self.color} {self.value}"
+
+    def equivalent(self, other):
+        return self.color == other.color and self.value == other.value

@@ -1,3 +1,6 @@
+import random
+
+from models.card import Card
 from models.card_pile import CardPile
 
 
@@ -86,3 +89,38 @@ def test_pick_too_many_cards(random_card_pile):
     card_taken = card_pile.pick_cards(pile_size + 1)
     assert len(card_taken) == pile_size
     assert len(card_pile) == pile_size
+
+
+def test_add_card(random_card_pile, random_card_factory):
+    card_pile = random_card_pile
+    initial_size = len(card_pile)
+    card = random_card_factory()
+    card_pile.add_card(card)
+    assert card in card_pile.cards
+    assert len(card_pile) == initial_size + 1
+
+
+def test_is_empty(random_card_pile):
+    card_pile = random_card_pile
+    assert not card_pile.is_empty()
+    card_pile.draw_cards(len(card_pile))
+    assert card_pile.is_empty()
+
+
+def test_has_card_equivalent(random_card_pile, random_card_factory):
+    card_1 = random_card_factory()
+    card_pile = random_card_pile
+    card_pile.add_card(card_1)
+    assert card_pile.has_card_equivalent(card_1)
+    assert not card_pile.has_card_equivalent(random_card_factory())
+
+
+def test_number_of_cards_like(random_card_pile, random_card):
+    card = random_card
+    card_pile = random_card_pile
+    card_already_present = card_pile.number_of_cards_like(card)
+
+    duplicate_number = random.randint(1, 10)
+    for _ in range(duplicate_number):
+        card_pile.add_card(Card(color=card.color, value=card.value))
+    assert card_pile.number_of_cards_like(card) == duplicate_number + card_already_present

@@ -8,6 +8,10 @@ def test_color_valid(random_card):
     assert random_card.color in Color.ALL_COLORS
 
 
+def test_str(random_card):
+    assert str(random_card) == f"{random_card.color} {random_card.value}"
+
+
 def test_color_invalid():
     with pytest.raises(ValueError):
         Card("Rojo", 1)

@@ -35,6 +35,10 @@ class CardPile:
     def __sub__(self, other):
         return CardPile(self.cards - other.cards)
 
+    # ToDo untested
+    def add_card(self, card: Card):
+        self.cards.add(card)
+
     def pretty_print(self):
         for card in self.cards:
             print(card)
@@ -50,3 +54,12 @@ class CardPile:
         drawn_cards = self.pick_cards(card_number)
         self.cards -= drawn_cards.cards
         return drawn_cards
+
+    def is_empty(self):
+        return len(self) == 0
+
+    def has_card_equivalent(self, card: Card):
+        return any(card.equivalent(own_card) for own_card in self.cards)
+
+    def number_of_cards_like(self, card: Card):
+        return sum(card.equivalent(own_card) for own_card in self.cards)
