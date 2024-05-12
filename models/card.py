@@ -1,3 +1,5 @@
+import uuid
+
 from constants.color import Color
 
 
@@ -9,6 +11,11 @@ class Card:
             raise ValueError("Invalid value")
         self.color = color
         self.value = value
+
+        self.id = uuid.uuid4()
+
+    def __hash__(self):
+        return self.id.int
 
     def __str__(self):
         return f"{self.color} {self.value}"

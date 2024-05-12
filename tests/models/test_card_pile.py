@@ -1,5 +1,8 @@
 import random
+import statistics
+import uuid
 
+from constants.color import Color
 from models.card import Card
 from models.card_pile import CardPile
 
@@ -9,6 +12,16 @@ def test_equality(random_card):
     pile_1 = CardPile({card})
     pile_2 = CardPile({card})
     assert pile_1 == pile_2
+
+
+def test_hash_uuid(random_card_pile):
+    card_pile = random_card_pile
+    assert isinstance(card_pile.id, uuid.UUID)
+
+
+def test_hash_collision_resistance(random_card_pile_factory):
+    hash_values = [hash(random_card_pile_factory()) for _ in range(1000)]
+    assert len(hash_values) == len(set(hash_values))
 
 
 def test_non_equality(random_card_factory):
@@ -107,6 +120,7 @@ def test_is_empty(random_card_pile):
     assert card_pile.is_empty()
 
 
+# ToDo: This test can randomly fail -> make it more resilient
 def test_has_card_equivalent(random_card_pile, random_card_factory):
     card_1 = random_card_factory()
     card_pile = random_card_pile
@@ -124,3 +138,11 @@ def test_number_of_cards_like(random_card_pile, random_card):
     for _ in range(duplicate_number):
         card_pile.add_card(Card(color=card.color, value=card.value))
     assert card_pile.number_of_cards_like(card) == duplicate_number + card_already_present
+
+
+def test_pretty_print(capfd):
+    card_pile = CardPile({Card(Color.GREEN, 2)})
+    card_pile.pretty_print()
+    out, err = capfd.readouterr()
+
+    assert out == 'Green 2\n'

@@ -4,7 +4,7 @@ import random
 import uuid
 from typing import Optional, Set, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:   # pragma: no cover
     from models.card import Card
 
 
@@ -19,9 +19,7 @@ class CardPile:
         return self.id.int
 
     def __eq__(self, other):
-        self_included_in_other = all(card in other.cards for card in self.cards)
-        other_included_in_self = all(card in self.cards for card in other.cards)
-        return self_included_in_other and other_included_in_self
+        return other.cards == self.cards
 
     def __len__(self):
         return len(self.cards)
@@ -35,7 +33,6 @@ class CardPile:
     def __sub__(self, other):
         return CardPile(self.cards - other.cards)
 
-    # ToDo untested
     def add_card(self, card: Card):
         self.cards.add(card)
 
