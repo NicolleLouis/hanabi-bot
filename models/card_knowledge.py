@@ -32,12 +32,14 @@ class CardKnowledge:
         self.clean()
 
     def add_negative_color_information(self, color: str) -> None:
-        self.possible_colors.remove(color)
-        self.clean()
+        if color in self.possible_colors:
+            self.possible_colors.remove(color)
+            self.clean()
 
     def add_negative_value_information(self, value: int) -> None:
-        self.possible_values.remove(value)
-        self.clean()
+        if value in self.possible_values:
+            self.possible_values.remove(value)
+            self.clean()
 
     def clean(self) -> None:
         self.sanity_check()
