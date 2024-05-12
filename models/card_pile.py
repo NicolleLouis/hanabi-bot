@@ -5,11 +5,11 @@ import uuid
 from typing import Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:   # pragma: no cover
-    from models.card import Card
+    from models.physical_card import PhysicalCard
 
 
 class CardPile:
-    def __init__(self, cards: Optional[Set[Card]] = None):
+    def __init__(self, cards: Optional[Set[PhysicalCard]] = None):
         if cards is None:
             cards = set()
         self.cards = cards.copy()
@@ -33,7 +33,7 @@ class CardPile:
     def __sub__(self, other):
         return CardPile(self.cards - other.cards)
 
-    def add_card(self, card: Card):
+    def add_card(self, card: PhysicalCard):
         self.cards.add(card)
 
     def pretty_print(self):
@@ -55,8 +55,8 @@ class CardPile:
     def is_empty(self):
         return len(self) == 0
 
-    def has_card_equivalent(self, card: Card):
+    def has_card_equivalent(self, card: PhysicalCard):
         return any(card.equivalent(own_card) for own_card in self.cards)
 
-    def number_of_cards_like(self, card: Card):
+    def number_of_cards_like(self, card: PhysicalCard):
         return sum(card.equivalent(own_card) for own_card in self.cards)

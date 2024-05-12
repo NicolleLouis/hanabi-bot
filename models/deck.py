@@ -1,5 +1,5 @@
 from constants.color import Color
-from models.card import Card
+from models.physical_card import PhysicalCard
 from models.card_pile import CardPile
 
 
@@ -22,4 +22,4 @@ class Deck:
         }
         for value, number in repartition.items():
             for _ in range(number):
-                self.cards.add_card(Card(color, value))
+                self.cards.add_card(PhysicalCard(color, value))
