@@ -4,15 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["Louis Nicolle <louis.a.nicolle@gmail.com>"]
 readme = "README.md"
-packages = [{include = "hanabi-bot"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pytest-cov = "^5.0.0"
+websocket = "^0.2.1"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
 
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0"
 
 [build-system]
 requires = ["poetry-core"]
