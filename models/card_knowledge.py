@@ -2,6 +2,7 @@ from constants.color import Color
 from exceptions.models.card_knowledge import CardKnowledgeException
 
 
+# ToDo: manage impossible scenarios? Maybe listing all neg/pos clue and resetting all intuition?
 class CardKnowledge:
     def __init__(self):
         self.possible_colors = Color.ALL_COLORS.copy()
