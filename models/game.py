@@ -14,10 +14,13 @@ class Game:
         self.turn = -1
         self.current_player_index = -1
 
+    def __str__(self):
+        return f"Game: table_id={self.table_id}, turn_number={self.turn}"
+
     def start(self, data):
         self.player_names = data["playerNames"]
         self.own_index = data["ourPlayerIndex"]
-        self.table_id = data["tableId"]
+        self.table_id = data["tableID"]
 
         # Initialize the hands for each player (an array of cards).
         # ToDo: Replace by real cards
@@ -71,11 +74,12 @@ class Game:
             )
 
     def update_state(self, data):
-        data = data["action"]
+        # data = data["action"]
 
         if data["type"] == "draw":
             # Add the newly drawn card to the player's hand.
             hand = self.hands[data["playerIndex"]]
+            print(data["suitIndex"])
             hand.append(
                 {
                     "order": data["order"],

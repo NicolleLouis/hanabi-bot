@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+import pdb
 import sys
 import os
-import dotenv
 import requests
+from dotenv import dotenv_values
 from models.client import Client
 
 
@@ -14,10 +15,11 @@ class Bot:
 
     def start(self):
         # Load environment variables from the ".env" file.
-        dotenv.load_dotenv()
+        config = dotenv_values(".env")
 
-        username = os.getenv("HANABI_USERNAME")
-        password = os.getenv("HANABI_PASSWORD")
+        # Load environment variables from the ".env" file.
+        username = config.get(f"HANABI_USERNAME{self.bot_index}")
+        password = config.get(f"HANABI_PASSWORD{self.bot_index}")
 
         # The official site uses HTTPS.
         protocol = "https"

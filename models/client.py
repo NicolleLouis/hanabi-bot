@@ -1,4 +1,6 @@
 import json
+import pdb
+
 import websocket
 
 from constants.actions import ACTION
@@ -42,7 +44,7 @@ class Client:
             on_message=lambda ws, message: self.websocket_message(ws, message),
             on_error=lambda ws, error: self.websocket_error(ws, error),
             on_open=lambda ws: self.websocket_open(ws),
-            on_close=lambda ws: self.websocket_close(ws),
+            on_close=lambda ws, close_status_code, close_msg: self.websocket_close(ws),
             cookie=cookie,
         )
         self.ws.run_forever()
@@ -141,7 +143,8 @@ class Client:
     # -------------------------------
 
     def game_start(self, data):
-        game = Game()
+        game = Game(self)
+        self.games[data["tableID"]] = game
         game.start(data)
         self.send(
             "getGameInfo2",
@@ -150,13 +153,20 @@ class Client:
             },
         )
 
-    def game_action(self, data):
-        game = self.games[data["tableID"]]
+    def game_action(self, data, table_id=None):
+        print("single action")
+        if table_id is None:
+            table_id = data["tableID"]
+        game = self.games[table_id]
         game.handle_action(data)
+        print("action handled")
 
     def game_action_list(self, data):
+        print(data)
         for action in data["list"]:
-            self.game_action(action)
+            print(action)
+            self.game_action(action, data["tableID"])
+        print("sending feedbacks")
         self.send(
             "loaded",
             {

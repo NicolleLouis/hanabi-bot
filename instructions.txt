@@ -1,0 +1,4 @@
+/pm LaFayetteBot1 /join
+/pm LaFayetteBot2 /join
+/pm LaFayetteBot3 /join
+/pm LaFayetteBot4 /join

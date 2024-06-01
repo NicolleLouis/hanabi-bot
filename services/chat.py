@@ -23,7 +23,7 @@ class ChatService:
         if not data["msg"].startswith("/"):
             raise Exception("The message does not start with a slash")
 
-        cleaned_message = data["msg"][1:]  # Remove the slash.
+        cleaned_message = data["msg"][1:]  # Remove the slash
 
         command_arguments = cleaned_message.split(" ", 1)
         return command_arguments
