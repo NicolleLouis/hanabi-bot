@@ -1,12 +1,11 @@
 import json
-import pdb
 
-import websocket
 
 from constants.actions import ACTION
 from models.game import Game
 from services.chat import ChatService
 from services.client import ClientService
+from websocket._app import WebSocketApp
 
 
 class Client:
@@ -43,7 +42,7 @@ class Client:
     # ------------------
 
     def start(self):
-        self.ws = websocket.WebSocketApp(
+        self.ws = WebSocketApp(
             self.url,
             on_message=lambda ws, message: self.websocket_message(ws, message),
             on_error=lambda ws, error: self.websocket_error(ws, error),
@@ -154,6 +153,7 @@ class Client:
         )
 
     def game_action(self, data, table_id=None):
+        print(data)
         if table_id is None:
             table_id = data["tableID"]
         game = self.games[table_id]
@@ -162,6 +162,10 @@ class Client:
     def game_action_list(self, data):
         for action in data["list"]:
             self.game_action(action, data["tableID"])
+
+        game = self.games[data["tableID"]]
+        game.ready()
+
         self.send(
             "loaded",
             {

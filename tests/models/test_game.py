@@ -11,10 +11,10 @@ def test_start_game(client):
     game.start(data)
 
     assert game.table_id == "table1"
-    assert game.turn == -1
+    assert game.turn_number == -1
     assert game.own_index == 1
     assert len(game.players) == 3
 
 
-def test_get_players(game):
-    assert game.get_players(0).name == game.players[0].name
+def test_get_player(game):
+    assert game.get_player(0).name == game.players[0].name

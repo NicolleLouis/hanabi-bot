@@ -5,8 +5,14 @@ from models.player import Player
 
 from typing import TYPE_CHECKING
 
+from models.stack import Stack
+
 if TYPE_CHECKING:
     from models.client import Client
+
+
+class GameException(Exception):
+    pass
 
 
 class Game:
@@ -16,42 +22,71 @@ class Game:
         self.clue_tokens = 8
         self.players = []
         self.own_index = -1
-        self.hands = []
-        self.play_stacks = []
+        self.stacks = []
         self.discard_pile = []
-        self.turn = -1
+        self.turn_number = -1
         self.current_player_index = -1
 
     def __str__(self):
-        return f"Game: table_id={self.table_id}, turn_number={self.turn}"
+        return f"Game: table_id={self.table_id}, turn_number={self.turn_number}"
 
     def start(self, data):
         self.generate_players(data["playerNames"])
         self.own_index = data["ourPlayerIndex"]
         self.table_id = data["tableID"]
 
-        # Initialize the play stacks.
-        # ToDo: Replace by real stacks
         suits_number = 5
-        for _ in range(suits_number):
-            self.play_stacks.append([])
+        for suit in range(suits_number):
+            self.stacks.append(Stack(suit))
+
+    def pretty_print(self):
+        print("Players:")
+        for player in self.players:
+            player.pretty_print()
+        print("Stacks:")
+        for stack in self.stacks:
+            print(stack)
 
     def generate_players(self, player_names):
         for i, name in enumerate(player_names):
             self.players.append(Player(name, i))
 
-    def get_players(self, player_index):
+    def get_player(self, player_index) -> Player:
         return self.players[player_index]
 
+    def get_stack(self, suit):
+        for stack in self.stacks:
+            if stack.suit == suit:
+                return stack
+        raise GameException(f"Stack {suit} not found")
+
+    def ready(self):
+        self.turn_number = 0
+        self.current_player_index = 0
+        self.choose_action()
+
     def handle_action(self, data):
-        # We just received a new action for an ongoing game.
+        if "action" in data:
+            data = data["action"]
         self.update_state(data)
 
-        if self.current_player_index == self.own_index:
-            self.choose_action(data)
+        self.choose_action(data)
 
-    def choose_action(self, data):
-        # Decide what to do.
+    def update_state(self, data):
+        action = {
+            "draw": self.draw,
+            "play": self.play,
+            "discard": self.discard,
+            "clue": self.clue,
+            "turn": self.turn,
+        }
+        action[data["type"]](data)
+
+    # todo: refacto
+    def choose_action(self, data=None):
+        if self.current_player_index != self.own_index:
+            return
+
         if self.clue_tokens > 0:
             # There is a clue available, so give a rank clue to the next
             # person's slot 1 card.
@@ -61,78 +96,63 @@ class Game:
             if target_index > len(self.players) - 1:
                 target_index = 0
 
-            # Cards are added oldest to newest, so "slot 1" is the final
-            # element in the list.
-            target_hand = self.hands[target_index]
-            slot_1_card = target_hand[-1]
+            target_player = self.get_player(target_index)
+            slot_1_card = target_player.get_card_by_slot(1)
 
             self.send_decision(
                 {
                     "type": ACTION.RANK_CLUE,
                     "target": target_index,
-                    "value": slot_1_card["rank"],
+                    "value": slot_1_card.rank,
                 }
             )
         else:
             # There are no clues available, so discard our oldest card.
-            oldest_card = self.hands[self.own_index][0]
+            oldest_card = self.get_player(self.own_index).get_chop()
             self.send_decision(
                 {
                     "type": ACTION.DISCARD,
-                    "target": oldest_card["order"],
+                    "target": oldest_card.order,
                 }
             )
 
-    # ToDo refacto in smaller function
-    def update_state(self, data):
-        # data = data["action"] <- Still needed?
+    def draw(self, data):
+        player = self.get_player(data["playerIndex"])
+        player.add_card_to_hand(
+            data["order"],
+            data["rank"],
+            data["suitIndex"],
+        )
 
-        if data["type"] == "draw":
-            player = self.get_players(data["playerIndex"])
-            player.add_card_to_hand(
-                data["order"],
-                data["rank"],
-                data["suitIndex"],
-            )
+    def play(self, data):
+        player = self.get_player(data["which"]["playerIndex"])
+        order = data["which"]["order"]
+        card = player.remove_card_from_hand(order)
+        self.get_stack(card.suit).add_card(card)
 
-        elif data["type"] == "play":
-            player = self.get_players(data["which"]["playerIndex"])
-            order = data["which"]["order"]
-            card = player.remove_card_from_hand(order)
-            if card is not None:
-                # TODO Add the card to the play stacks.
-                pass
+    def discard(self, data):
+        player = self.get_player(data["which"]["playerIndex"])
+        order = data["which"]["order"]
+        card = player.remove_card_from_hand(order)
+        self.discard_pile.append(card)
 
-        elif data["type"] == "discard":
-            player = self.get_players(data["which"]["playerIndex"])
-            order = data["which"]["order"]
-            card = player.remove_card_from_hand(order)
-            if card is not None:
-                # TODO Add the card to the discard stacks.
-                pass
+        if not data["failed"]:
+            self.clue_tokens += 1
 
-            # Discarding adds a clue. But misplays are represented as discards,
-            # and misplays do not grant a clue.
-            if not data["failed"]:
-                self.clue_tokens += 1
+    # ToDo send the info to the players
+    def clue(self, data):
+        # ['type': 'clue',
+        # 'clue': {'type': 1, 'value': 1}, <- color clue
+        # 'giver': 0,
+        # 'list': [8, 9],
+        # 'target': 1,
+        # 'turn': 0}
+        print(data)
+        self.clue_tokens -= 1
 
-        elif data["type"] == "clue":
-            # Each clue costs one clue token.
-            self.clue_tokens -= 1
-
-            # TODO We might also want to update the game of cards that are
-            # "touched" by the clue so that we can keep track of the positive
-            # and negative information "on" the card.
-
-        elif data["type"] == "turn":
-            # A turn is comprised of one or more game actions (e.g. play +
-            # draw). The turn action will be the final thing sent on a turn,
-            # which also includes the index of the new current player.
-            # TODO: This action may be removed from the server in the future
-            # since the client is expected to calculate the turn on its own
-            # from the actions.
-            self.turn = data["num"]
-            self.current_player_index = data["currentPlayerIndex"]
+    def turn(self, data):
+        self.turn_number = data["num"]
+        self.current_player_index = data["currentPlayerIndex"]
 
     def send_decision(self, decision):
         body = {
