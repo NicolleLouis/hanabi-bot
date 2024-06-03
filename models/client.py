@@ -11,6 +11,8 @@ from services.client import ClientService
 
 class Client:
     def __init__(self, url, cookie):
+        self.url = url
+        self.cookie = cookie
         # Initialize all class variables.
         self.command_handlers = {}
         self.tables = {}
@@ -36,22 +38,20 @@ class Client:
         self.command_handlers["gameActionList"] = self.game_action_list
         self.command_handlers["databaseID"] = self.database_id
 
-        # Start the WebSocket client.
-        print('Connecting to "' + url + '".')
+    # ------------------
+    # WebSocket Handlers
+    # ------------------
 
+    def start(self):
         self.ws = websocket.WebSocketApp(
-            url,
+            self.url,
             on_message=lambda ws, message: self.websocket_message(ws, message),
             on_error=lambda ws, error: self.websocket_error(ws, error),
             on_open=lambda ws: self.websocket_open(ws),
             on_close=lambda ws, close_status_code, close_msg: self.websocket_close(ws),
-            cookie=cookie,
+            cookie=self.cookie,
         )
         self.ws.run_forever()
-
-    # ------------------
-    # WebSocket Handlers
-    # ------------------
 
     def websocket_message(self, ws, message):
         result = message.split(" ", 1)  # Split it into two things
@@ -154,19 +154,14 @@ class Client:
         )
 
     def game_action(self, data, table_id=None):
-        print("single action")
         if table_id is None:
             table_id = data["tableID"]
         game = self.games[table_id]
         game.handle_action(data)
-        print("action handled")
 
     def game_action_list(self, data):
-        print(data)
         for action in data["list"]:
-            print(action)
             self.game_action(action, data["tableID"])
-        print("sending feedbacks")
         self.send(
             "loaded",
             {

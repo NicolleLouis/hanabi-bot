@@ -1,14 +1,22 @@
+from __future__ import annotations
+
 from constants.actions import ACTION
+from models.player import Player
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.client import Client
 
 
 class Game:
-    def __init__(self, client):
+    def __init__(self, client: Client):
         self.client = client
         self.table_id = None
         self.clue_tokens = 8
-        self.player_names = []
+        self.players = []
         self.own_index = -1
-        self.hands = []  # An array containing card objects (dictionaries).
+        self.hands = []
         self.play_stacks = []
         self.discard_pile = []
         self.turn = -1
@@ -18,20 +26,22 @@ class Game:
         return f"Game: table_id={self.table_id}, turn_number={self.turn}"
 
     def start(self, data):
-        self.player_names = data["playerNames"]
+        self.generate_players(data["playerNames"])
         self.own_index = data["ourPlayerIndex"]
         self.table_id = data["tableID"]
-
-        # Initialize the hands for each player (an array of cards).
-        # ToDo: Replace by real cards
-        for _ in range(len(self.player_names)):
-            self.hands.append([])
 
         # Initialize the play stacks.
         # ToDo: Replace by real stacks
         suits_number = 5
         for _ in range(suits_number):
             self.play_stacks.append([])
+
+    def generate_players(self, player_names):
+        for i, name in enumerate(player_names):
+            self.players.append(Player(name, i))
+
+    def get_players(self, player_index):
+        return self.players[player_index]
 
     def handle_action(self, data):
         # We just received a new action for an ongoing game.
@@ -48,7 +58,7 @@ class Game:
 
             # Target the next player.
             target_index = self.own_index + 1
-            if target_index > len(self.player_names) - 1:
+            if target_index > len(self.players) - 1:
                 target_index = 0
 
             # Cards are added oldest to newest, so "slot 1" is the final
@@ -73,33 +83,30 @@ class Game:
                 }
             )
 
+    # ToDo refacto in smaller function
     def update_state(self, data):
-        # data = data["action"]
+        # data = data["action"] <- Still needed?
 
         if data["type"] == "draw":
-            # Add the newly drawn card to the player's hand.
-            hand = self.hands[data["playerIndex"]]
-            print(data["suitIndex"])
-            hand.append(
-                {
-                    "order": data["order"],
-                    "suit_index": data["suitIndex"],
-                    "rank": data["rank"],
-                }
+            player = self.get_players(data["playerIndex"])
+            player.add_card_to_hand(
+                data["order"],
+                data["rank"],
+                data["suitIndex"],
             )
 
         elif data["type"] == "play":
-            player_index = data["which"]["playerIndex"]
+            player = self.get_players(data["which"]["playerIndex"])
             order = data["which"]["order"]
-            card = self.remove_card_from_hand(player_index, order)
+            card = player.remove_card_from_hand(order)
             if card is not None:
                 # TODO Add the card to the play stacks.
                 pass
 
         elif data["type"] == "discard":
-            player_index = data["which"]["playerIndex"]
+            player = self.get_players(data["which"]["playerIndex"])
             order = data["which"]["order"]
-            card = self.remove_card_from_hand(player_index, order)
+            card = player.remove_card_from_hand(order)
             if card is not None:
                 # TODO Add the card to the discard stacks.
                 pass
@@ -126,23 +133,6 @@ class Game:
             # from the actions.
             self.turn = data["num"]
             self.current_player_index = data["currentPlayerIndex"]
-
-    def remove_card_from_hand(self, player_index, order):
-        hand = self.hands[player_index]
-        card_index = -1
-        for i in range(len(hand)):
-            card = hand[i]
-            if card["order"] == order:
-                card_index = i
-        if card_index == -1:
-            print(
-                "error: unable to find card with order " + str(order) + " in"
-                "the hand of player " + str(player_index)
-            )
-            return None
-        card = hand[card_index]
-        del hand[card_index]
-        return card
 
     def send_decision(self, decision):
         body = {

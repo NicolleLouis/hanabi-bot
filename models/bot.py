@@ -57,4 +57,4 @@ class Bot:
             print(response.headers)
             sys.exit(1)
 
-        Client(ws_url, cookie)
+        Client(ws_url, cookie).start()
