@@ -10,7 +10,7 @@ def test_card_str():
     assert str(card) == "0 of 0"
 
 
-def test_eq():
+def test_equivalent():
     card_1 = Card(
         order=0,
         suit=0,
@@ -21,4 +21,4 @@ def test_eq():
         suit=0,
         rank=0,
     )
-    assert card_1 == card_2
+    assert card_1.equivalent(card_2)

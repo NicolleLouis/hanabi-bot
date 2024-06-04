@@ -2,8 +2,7 @@ from models.card import Card
 
 
 class PlayerException(Exception):
-    def __init__(self, message):
-        super().__init__(message)
+    pass
 
 
 class Player:

@@ -4,11 +4,12 @@ from models.player import Player, PlayerException
 
 
 def remove_card_with_order(player, order) -> None:
+    hand_size = len(player.hand)
     try:
-        for _ in range(len(player.hand)):
+        for _ in range(hand_size):
             player.remove_card_from_hand(order)
     except PlayerException:
-        pass
+        return
 
 
 def test_player_str():

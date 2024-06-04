@@ -19,4 +19,7 @@ class Card:
         return f"{self.rank} of {self.suit}"
 
     def __eq__(self, other):
+        return self.rank == other.rank and self.suit == other.suit and self.order == other.order
+
+    def equivalent(self, other):
         return self.rank == other.rank and self.suit == other.suit

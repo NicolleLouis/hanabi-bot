@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-import pdb
 import sys
-import os
 import requests
 from dotenv import dotenv_values
 from models.client import Client
