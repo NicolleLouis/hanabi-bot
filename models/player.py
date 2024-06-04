@@ -18,14 +18,13 @@ class Player:
         print(f"Player: {self}")
         print("Hand:")
         for card in self.hand:
-            print(card)
+            card.pretty_print()
 
-    # Cards are added oldest to newest, so "slot 1" is the final
-    # element in the list
+    # Cards are added oldest to newest, so "slot 1" is the final element in the list
     def get_card_by_slot(self, slot_number):
         return self.hand[-slot_number]
 
-    # ToDo: only count clued cards
+    # ToDo: avoid clued cards
     def get_chop(self) -> Card:
         return self.hand[0]
 

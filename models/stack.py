@@ -18,9 +18,11 @@ class Stack:
     def add_card(self, card: Card):
         try:
             self.check_card_validity(card)
-            self.current_rank += 1
         except StackException:
-            pass
+            return False
+
+        self.current_rank += 1
+        return True
 
     def check_card_validity(self, card: Card):
         if card.suit != self.suit:

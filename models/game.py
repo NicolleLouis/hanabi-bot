@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from models.stack import Stack
 from services.clue_giver import ClueGiver
+from services.clue_receiver import ClueReceiver
 from services.discard import DiscardService
 from services.player_finder import PlayerFinder
 
@@ -29,8 +30,10 @@ class Game:
         self.discard_pile = []
         self.turn_number = -1
         self.current_player_index = -1
-        self.player_finder = PlayerFinder(self)
+
         self.discard_service = None
+        self.player_finder = PlayerFinder(self)
+        self.clue_receiver = ClueReceiver(self)
 
     def __str__(self):
         return f"Game: table_id={self.table_id}, turn_number={self.turn_number}"
@@ -70,7 +73,9 @@ class Game:
     def ready(self):
         self.turn_number = 0
         self.current_player_index = 0
-        self.choose_action()
+        action_chosen = self.choose_action()
+        if action_chosen in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
+            self.clue_tokens -= 1
 
     def handle_action(self, data):
         if "action" in data:
@@ -78,6 +83,7 @@ class Game:
         self.update_state(data)
 
         self.choose_action()
+        print(self.clue_tokens)
 
     def update_state(self, data):
         action = {
@@ -89,7 +95,7 @@ class Game:
         }
         action[data["type"]](data)
 
-    def choose_action(self):
+    def choose_action(self) -> str:
         if self.current_player_index != self.own_index:
             return
 
@@ -97,10 +103,12 @@ class Game:
             self.submit_action(
                 ClueGiver(player=self.player_finder.next_seated_player(), is_color_clue=True).to_slot(1)
             )
+            return ACTION.COLOR_CLUE
         else:
             self.submit_action(
                 self.discard_service.to_chop()
             )
+            return ACTION.DISCARD
 
     def draw(self, data):
         player = self.get_player(data["playerIndex"])
@@ -111,29 +119,24 @@ class Game:
         )
 
     def play(self, data):
-        player = self.get_player(data["which"]["playerIndex"])
-        order = data["which"]["order"]
+        player = self.get_player(data["playerIndex"])
+        order = data["order"]
         card = player.remove_card_from_hand(order)
-        self.get_stack(card.suit).add_card(card)
+        success = self.get_stack(card.suit).add_card(card)
+        if success and card.rank == 5:
+            self.clue_tokens += 1
 
     def discard(self, data):
-        player = self.get_player(data["which"]["playerIndex"])
-        order = data["which"]["order"]
+        player = self.get_player(data["playerIndex"])
+        order = data["order"]
         card = player.remove_card_from_hand(order)
         self.discard_pile.append(card)
 
         if not data["failed"]:
             self.clue_tokens += 1
 
-    # ToDo send the info to the players
     def clue(self, data):
-        # ['type': 'clue',
-        # 'clue': {'type': 1, 'value': 1}, <- color clue
-        # 'giver': 0,
-        # 'list': [8, 9],
-        # 'target': 1,
-        # 'turn': 0}
-        print(data)
+        self.clue_receiver.receive_clue(data)
         self.clue_tokens -= 1
 
     def turn(self, data):

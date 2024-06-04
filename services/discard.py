@@ -17,7 +17,7 @@ class DiscardService:
     def build(card: Card) -> dict:
         return {
             "type": ACTION.DISCARD,
-            "card": card.order
+            "target": card.order
         }
 
     def to_card(self, card: Card):

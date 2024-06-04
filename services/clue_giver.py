@@ -16,7 +16,7 @@ class ClueGiver:
 
     def build(self, card: Card) -> dict:
         body = {
-            "playerIndex": self.player.index,
+            "target": self.player.index,
         }
         if self.is_color_clue:
             body["type"] = ACTION.COLOR_CLUE

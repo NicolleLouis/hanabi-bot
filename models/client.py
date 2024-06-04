@@ -1,7 +1,6 @@
 import json
 
 
-from constants.actions import ACTION
 from models.game import Game
 from services.chat import ChatService
 from services.client import ClientService
@@ -153,7 +152,6 @@ class Client:
         )
 
     def game_action(self, data, table_id=None):
-        print(data)
         if table_id is None:
             table_id = data["tableID"]
         game = self.games[table_id]

@@ -1,7 +1,7 @@
 # hanabi-live-bot
 
 A bot for playing Hanabi on [hanabi.live](https://hanabi.live/)
-It follows H-Convention, currently at beginner level.
+It follows H-Convention, currently at really dumb level.
 
 <br>
 

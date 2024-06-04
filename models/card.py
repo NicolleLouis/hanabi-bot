@@ -18,6 +18,13 @@ class Card:
     def __str__(self):
         return f"{self.rank} of {self.suit}"
 
+    def pretty_print(self) -> None:
+        print("Card:")
+        print(self)
+        print(f"Order: {self.order}")
+        self.known_info.pretty_print()
+        self.computed_info.pretty_print()
+
     def __eq__(self, other):
         return self.rank == other.rank and self.suit == other.suit and self.order == other.order
 
