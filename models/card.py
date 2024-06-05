@@ -30,3 +30,6 @@ class Card:
 
     def equivalent(self, other):
         return self.rank == other.rank and self.suit == other.suit
+
+    def touched(self):
+        return self.known_info.touched or self.computed_info.touched

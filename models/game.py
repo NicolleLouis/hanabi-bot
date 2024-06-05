@@ -3,7 +3,7 @@ from __future__ import annotations
 from constants.actions import ACTION
 from models.player import Player
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from models.stack import Stack
 from services.clue_giver import ClueGiver
@@ -95,7 +95,7 @@ class Game:
         }
         action[data["type"]](data)
 
-    def choose_action(self) -> str:
+    def choose_action(self) -> Optional[str]:
         if self.current_player_index != self.own_index:
             return
 

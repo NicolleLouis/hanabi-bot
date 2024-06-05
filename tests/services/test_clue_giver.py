@@ -4,14 +4,14 @@ from services.clue_giver import ClueGiver
 
 def test_build_color(player, card):
     body = ClueGiver(player, True).build(card)
-    assert body["playerIndex"] == player.index
+    assert body["target"] == player.index
     assert body["type"] == ACTION.COLOR_CLUE
     assert body["value"] == card.suit
 
 
 def test_build_rank(player, card):
     body = ClueGiver(player, False).build(card)
-    assert body["playerIndex"] == player.index
+    assert body["target"] == player.index
     assert body["type"] == ACTION.RANK_CLUE
     assert body["value"] == card.rank
 

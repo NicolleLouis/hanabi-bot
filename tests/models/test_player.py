@@ -61,3 +61,29 @@ def test_remove_card_failure(player, card):
 
     with pytest.raises(PlayerException):
         player.remove_card_from_hand(card.order)
+
+
+def test_get_chop():
+    player = Player("Louis", 0)
+    player.add_card_to_hand(0, 1, 1)
+    chop_card = player.get_card(0)
+    assert player.get_chop() == chop_card
+
+    chop_card.known_info.add_positive_clue(True, 1)
+    player.add_card_to_hand(1, 1, 1)
+    new_chop_card = player.get_card(1)
+    assert player.get_chop() == new_chop_card
+
+
+def test_get_finesse():
+    player = Player("Louis", 0)
+    player.add_card_to_hand(0, 1, 1)
+    player.add_card_to_hand(1, 1, 1)
+    player.add_card_to_hand(2, 1, 1)
+    player.add_card_to_hand(3, 1, 1)
+    finesse_card = player.get_card(3)
+    assert player.get_finesse() == finesse_card
+
+    finesse_card.known_info.add_positive_clue(True, 1)
+    new_finesse_card = player.get_card(2)
+    assert player.get_finesse() == new_finesse_card

@@ -1,3 +1,5 @@
+from typing import List
+
 from models.card import Card
 
 
@@ -24,9 +26,14 @@ class Player:
     def get_card_by_slot(self, slot_number):
         return self.hand[-slot_number]
 
-    # ToDo: avoid clued cards
+    def unclued_cards(self) -> List[Card]:
+        return [card for card in self.hand if not card.touched()]
+
+    def get_finesse(self) -> Card:
+        return self.unclued_cards()[-1]
+
     def get_chop(self) -> Card:
-        return self.hand[0]
+        return self.unclued_cards()[0]
 
     def remove_card_from_hand(self, card_order) -> Card:
         card = self.get_card(card_order)
