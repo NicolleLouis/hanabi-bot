@@ -115,6 +115,8 @@ class Game:
         player = self.get_player(data["playerIndex"])
         order = data["order"]
         card = player.remove_card_from_hand(order)
+        card.set_suit(data["suitIndex"])
+        card.set_rank(data["rank"])
         success = self.get_stack(card.suit).add_card(card)
         if success and card.rank == 5:
             self.clue_tokens += 1

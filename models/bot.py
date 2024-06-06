@@ -1,3 +1,4 @@
+import os
 import sys
 import requests
 from dotenv import dotenv_values
@@ -12,7 +13,8 @@ class Bot:
 
     def start(self):
         # Load environment variables from the ".env" file.
-        config = dotenv_values(".env")
+        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+        config = dotenv_values(env_path)
 
         # Load environment variables from the ".env" file.
         username = config.get(f"HANABI_USERNAME{self.bot_index}")

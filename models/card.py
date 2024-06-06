@@ -25,6 +25,12 @@ class Card:
         self.known_info.pretty_print()
         self.computed_info.pretty_print()
 
+    def set_suit(self, suit):
+        self.suit = suit
+
+    def set_rank(self, rank):
+        self.rank = rank
+
     def __eq__(self, other):
         return self.rank == other.rank and self.suit == other.suit and self.order == other.order
 

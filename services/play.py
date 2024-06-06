@@ -10,13 +10,13 @@ if TYPE_CHECKING:
     from models.player import Player
 
 
-class DiscardService:
+class PlayService:
     def __init__(self, player: Player):
         self.player = player
 
     @staticmethod
     def build(card: Card) -> Action:
-        return Action(action_type=ACTION.DISCARD, target=card.order)
+        return Action(action_type=ACTION.PLAY, target=card.order)
 
     def to_card(self, card: Card):
         return self.build(card)
@@ -26,3 +26,6 @@ class DiscardService:
 
     def to_chop(self):
         return self.build(self.player.get_chop())
+
+    def to_finesse(self):
+        return self.build(self.player.get_finesse())

@@ -24,7 +24,6 @@ class ClueReceiver:
     def analyse_clue(self, clue: Clue, focus: Card) -> None:
         chop = self.get_player(clue).get_chop()
         if focus != chop:
-            print("Play Clue detected")
             focus.computed_info.playable = True
 
     def get_player(self, clue) -> Player:
