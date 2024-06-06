@@ -16,7 +16,16 @@ class ClueReceiver:
 
     def receive_clue(self, data):
         clue = Clue(data)
+        focus = self.find_focus(clue)
+        self.analyse_clue(clue, focus)
         self.save_clue_information(clue)
+
+    # ToDo: add save clues
+    def analyse_clue(self, clue: Clue, focus: Card) -> None:
+        chop = self.get_player(clue).get_chop()
+        if focus != chop:
+            print("Play Clue detected")
+            focus.computed_info.playable = True
 
     def get_player(self, clue) -> Player:
         return self.game.player_finder.get_player(clue.player_index)

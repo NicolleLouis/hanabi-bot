@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 from constants.actions import ACTION
+from models.brain import Brain
 from models.player import Player
 
 from typing import TYPE_CHECKING, Optional
 
 from models.stack import Stack
-from services.clue_giver import ClueGiver
 from services.clue_receiver import ClueReceiver
-from services.discard import DiscardService
 from services.player_finder import PlayerFinder
 
 if TYPE_CHECKING:
     from models.client import Client
+    from models.action import Action
 
 
 class GameException(Exception):
@@ -31,9 +31,9 @@ class Game:
         self.turn_number = -1
         self.current_player_index = -1
 
-        self.discard_service = None
         self.player_finder = PlayerFinder(self)
         self.clue_receiver = ClueReceiver(self)
+        self.brain = Brain(self)
 
     def __str__(self):
         return f"Game: table_id={self.table_id}, turn_number={self.turn_number}"
@@ -47,7 +47,7 @@ class Game:
         for suit in range(suits_number):
             self.stacks.append(Stack(suit))
 
-        self.discard_service = DiscardService(self.player_finder.find_self())
+        self.brain.set_player(self.player_finder.find_self())
 
     def pretty_print(self):
         print("Players:")
@@ -99,16 +99,9 @@ class Game:
         if self.current_player_index != self.own_index:
             return
 
-        if self.clue_tokens > 0:
-            self.submit_action(
-                ClueGiver(player=self.player_finder.next_seated_player(), is_color_clue=True).to_slot(1)
-            )
-            return ACTION.COLOR_CLUE
-        else:
-            self.submit_action(
-                self.discard_service.to_chop()
-            )
-            return ACTION.DISCARD
+        action = self.brain.find_action()
+        self.submit_action(action)
+        return action.action_type
 
     def draw(self, data):
         player = self.get_player(data["playerIndex"])
@@ -143,14 +136,14 @@ class Game:
         self.turn_number = data["num"]
         self.current_player_index = data["currentPlayerIndex"]
 
-    def submit_action(self, decision):
+    def submit_action(self, action: Action):
         body = {
             "tableID": self.table_id,
-            "type": decision["type"],
-            "target": decision["target"],
+            "type": action.action_type,
+            "target": action.target,
         }
-        if "value" in decision:
-            body["value"] = decision["value"]
+        if action.value is not None:
+            body["value"] = action.value
 
         self.client.send(
             "action",

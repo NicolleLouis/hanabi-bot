@@ -7,6 +7,7 @@ from constants.actions import ACTION
 if TYPE_CHECKING:
     from models.card import Card
     from models.player import Player
+    from models.action import Action
 
 
 class DiscardService:
@@ -14,11 +15,8 @@ class DiscardService:
         self.player = player
 
     @staticmethod
-    def build(card: Card) -> dict:
-        return {
-            "type": ACTION.DISCARD,
-            "target": card.order
-        }
+    def build(card: Card) -> Action:
+        return Action(action_type=ACTION.DISCARD, target=card.order)
 
     def to_card(self, card: Card):
         return self.build(card)
