@@ -5,3 +5,4 @@ from tests.factories.game import game
 from tests.factories.known_info import known_info
 from tests.factories.player import player
 from tests.factories.stack import stack, stack_factory
+from tests.factories.brain import brain

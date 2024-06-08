@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 
 if TYPE_CHECKING:
+    from models.board import Board
     from models.card.physical_card import PhysicalCard
     from models.card.known_info import KnownInfo
     from models.deck import Deck
@@ -17,9 +18,15 @@ class ComputedInfo:
 
         self.initialize_possible_cards(deck)
 
-    @staticmethod
-    def pretty_print():
+    def pretty_print(self) -> None:
         print("Computed Info:")
+        print(f"Playable: {self.playable}")
+        print(f"Number of possibilities: {len(self.possible_cards)}")
+        if len(self.possible_cards) <= 5:
+            self.display_possibilities()
+
+    def display_possibilities(self):
+        print(f"Possible Cards: {' '.join(map(str, self.possible_cards))}")
 
     def initialize_possible_cards(self, deck: Optional[Deck] = None):
         if deck is not None:
@@ -49,3 +56,9 @@ class ComputedInfo:
     def update_from_positive_suit_clues(self, known_info: KnownInfo):
         for positive_suit in known_info.positive_suit_clues:
             self.possible_cards = {card for card in self.possible_cards if card.suit == positive_suit}
+
+    def update_playability(self, board: Board):
+        if self.playable:
+            return
+
+        self.playable = all(board.is_card_valid(card) for card in self.possible_cards)

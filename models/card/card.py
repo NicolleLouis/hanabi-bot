@@ -53,5 +53,10 @@ class Card:
     def __eq__(self, other):
         return self.physical_card == other.physical_card and self.order == other.order
 
+    @property
     def touched(self):
         return self.known_info.touched or self.computed_info.touched
+
+    @property
+    def playable(self):
+        return self.computed_info.playable

@@ -43,7 +43,6 @@ class Game:
 
         # Services
         self.player_finder = PlayerFinder(self)
-        self.clue_receiver = ClueReceiver(self)
         self.brain = Brain(self)
 
     def __str__(self):
@@ -54,8 +53,7 @@ class Game:
         self.own_index = data["ourPlayerIndex"]
         self.table_id = data["tableID"]
 
-        suits_number = 5
-        self.suits = list(range(suits_number))
+        self.suits = [0, 1, 2, 3, 4]
         self.board = Board(self.suits)
         self.deck = Deck(self.suits)
 
@@ -76,17 +74,36 @@ class Game:
     def ready(self):
         self.turn_number = 0
         self.current_player_index = 0
+
+        if self.current_player_index != self.own_index:
+            return
+
         action_chosen = self.choose_action()
         if action_chosen in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
             self.clue_tokens -= 1
 
     def handle_action(self, data):
-        if "action" in data:
-            data = data["action"]
-        self.update_state(data)
+        try:
+            if "action" in data:
+                data = data["action"]
+            self.update_state(data)
 
-        self.choose_action()
-        print(self.clue_tokens)
+            if data["type"] != "turn":
+                return
+
+            if self.current_player_index != self.own_index:
+                return
+
+            print(data)
+            self.choose_action()
+        except Exception as e:
+            print(f"Error: {e}")
+            print(data)
+
+    def status(self, data):
+        if data["clues"] != self.clue_tokens:
+            print(data)
+            raise GameException("Clue tokens mismatch")
 
     def update_state(self, data):
         action = {
@@ -95,13 +112,11 @@ class Game:
             "discard": self.discard,
             "clue": self.clue,
             "turn": self.turn,
+            "status": self.status
         }
         action[data["type"]](data)
 
     def choose_action(self) -> Optional[str]:
-        if self.current_player_index != self.own_index:
-            return
-
         action = self.brain.find_action()
         self.submit_action(action)
         return action.action_type
@@ -135,7 +150,7 @@ class Game:
             self.clue_tokens += 1
 
     def clue(self, data):
-        self.clue_receiver.receive_clue(data)
+        self.brain.receive_clue(data=data)
         self.clue_tokens -= 1
 
     def turn(self, data):

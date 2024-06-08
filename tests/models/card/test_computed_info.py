@@ -1,3 +1,4 @@
+from models.board import Board
 from models.card.card import Card
 from models.card.physical_card import PhysicalCard
 from models.deck import Deck
@@ -90,3 +91,16 @@ def test_positive_rank_clues():
     assert (PhysicalCard(3, 1)) in card.computed_info.possible_cards
     assert (PhysicalCard(4, 1)) in card.computed_info.possible_cards
     assert (PhysicalCard(5, 1)) in card.computed_info.possible_cards
+
+
+def test_update_playability():
+    board = Board([1, 2])
+    card = Card(0, -1, -1)
+    card.computed_info.possible_cards = {PhysicalCard(1, 1), PhysicalCard(2, 2)}
+
+    card.computed_info.update_playability(board)
+    assert not card.playable
+    board.add_card(PhysicalCard(2, 1))
+
+    card.computed_info.update_playability(board)
+    assert card.playable

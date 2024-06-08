@@ -32,10 +32,10 @@ class Player:
         return self.hand[-slot_number]
 
     def unclued_cards(self) -> List[Card]:
-        return [card for card in self.hand if not card.touched()]
+        return [card for card in self.hand if not card.touched]
 
     def playable_cards(self):
-        return [card for card in self.hand if card.computed_info.playable]
+        return [card for card in self.hand if card.playable]
 
     def get_finesse(self) -> Card:
         return self.unclued_cards()[-1]

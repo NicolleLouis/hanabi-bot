@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from models.clue import Clue
 
@@ -10,12 +10,19 @@ if TYPE_CHECKING:
     from models.player import Player
 
 
+class ClueReceiverException(Exception):
+    pass
+
+
 class ClueReceiver:
     def __init__(self, game: Game):
         self.game = game
 
-    def receive_clue(self, data):
-        clue = Clue(data)
+    def receive_clue(self, data: Optional[dict] = None, clue: Optional[Clue] = None) -> None:
+        if clue is None:
+            if data is None:
+                raise ClueReceiverException("No clue or data provided")
+            clue = Clue(data)
         focus = self.find_focus(clue)
         self.analyse_clue(clue, focus)
         self.save_clue_information(clue)
@@ -41,17 +48,22 @@ class ClueReceiver:
         # Case single card touched
         if len(touched_cards) == 1:
             return touched_cards[0]
-        previously_unclued_cards = [card for card in touched_cards if not card.touched()]
+
+        previously_unclued_cards = [card for card in touched_cards if not card.touched]
+
         # Case no new cards clued
         if len(previously_unclued_cards) == 0:
             return touched_cards[-1]
+
         # Case single new card clued
         if len(previously_unclued_cards) == 1:
             return previously_unclued_cards[0]
+
         # Case chop touched
         chop = self.get_player(clue).get_chop()
         if chop in touched_cards:
             return chop
+
         # Case multiple new cards clued and no chop
         return previously_unclued_cards[-1]
 

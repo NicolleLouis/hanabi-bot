@@ -24,7 +24,7 @@ class Clue:
 
         if data is not None:
             self.player_index = data["target"]
-            self.is_color_clue = data["clue"]["type"] == 1
+            self.is_color_clue = data["clue"]["type"] == 0
             self.value = data["clue"]["value"]
             self.card_orders_touched = data["list"]
             return
@@ -37,6 +37,9 @@ class Clue:
             self.value = value
         if card_orders_touched is not None:
             self.card_orders_touched = card_orders_touched
+
+    def __str__(self):
+        return f"Clue: To:{self.player_index} - is_color:{self.is_color_clue} - value:{self.value}"
 
     @staticmethod
     def check_legality(
