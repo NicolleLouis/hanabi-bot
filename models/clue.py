@@ -1,5 +1,8 @@
 from typing import Optional, List
 
+from constants.actions import ACTION
+from models.action import Action
+
 
 class ClueException(Exception):
     pass
@@ -41,6 +44,19 @@ class Clue:
     def __str__(self):
         return f"Clue: To:{self.player_index} - is_color:{self.is_color_clue} - value:{self.value}"
 
+    def __eq__(self, other):
+        if self.player_index != other.player_index:
+            return False
+        if self.is_color_clue != other.is_color_clue:
+            return False
+        if self.value != other.value:
+            return False
+        if len([card for card in self.card_orders_touched if card not in other.card_orders_touched]) > 0:
+            return False
+        if len([card for card in other.card_orders_touched if card not in self.card_orders_touched]) > 0:
+            return False
+        return True
+
     @staticmethod
     def check_legality(
             data: Optional[dict] = None,
@@ -59,3 +75,10 @@ class Clue:
             raise ClueException("value is required")
         if card_orders_touched is None:
             raise ClueException("card_orders_touched is required")
+
+    def to_action(self) -> Action:
+        if self.is_color_clue:
+            action_type = ACTION.COLOR_CLUE
+        else:
+            action_type = ACTION.RANK_CLUE
+        return Action(action_type=action_type, target=self.player_index, value=self.value)

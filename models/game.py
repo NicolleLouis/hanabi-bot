@@ -8,7 +8,6 @@ from models.brain import Brain
 from models.deck import Deck
 from models.player import Player
 
-from services.clue_receiver import ClueReceiver
 from services.player_finder import PlayerFinder
 
 if TYPE_CHECKING:

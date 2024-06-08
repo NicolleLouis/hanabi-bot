@@ -62,3 +62,6 @@ class Player:
             deck=deck
         )
         self.hand.append(card)
+
+    def has_card(self, card: Card):
+        return len([c for c in self.hand if c.order == card.order]) > 0

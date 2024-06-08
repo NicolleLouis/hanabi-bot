@@ -1,5 +1,5 @@
 from models.clue import Clue
-from services.clue_receiver import ClueReceiver
+from services.clue.clue_receiver import ClueReceiver
 
 
 def test_focus_single_touched_card_case(game):

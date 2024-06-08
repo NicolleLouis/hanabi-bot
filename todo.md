@@ -2,10 +2,12 @@ Handle Strikes
 handle GameOver
 handle playerTimes (ignore)
 ---
-Add computation with discard
-Add computation with good touch principles
-Add computation: is card_playable from possibilities and stack
-Add computation card possibilities with clues (Play clue)
+https://hanab.live/shared-replay/1187475
+Handle 8 clue situation (send stall)
+Discard known trashes (1s for example)
+---
+MultiPLayer issues (Clue mismatch for some reason)
+
 ---
 Add computation: is savable (From deck + discard)
 Add save clues (Impact card possibilities)

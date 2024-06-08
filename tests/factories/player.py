@@ -20,3 +20,11 @@ def player(card_factory) -> Player:
             card_rank=random_card.rank
         )
     return player
+
+
+@pytest.fixture
+def empty_handed_player() -> Player:
+    fake = Faker()
+    name = fake.first_name()
+    index = random.randint(0, 4)
+    return Player(name, index)

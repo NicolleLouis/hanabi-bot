@@ -6,6 +6,7 @@ from constants.actions import ACTION
 from models.action import Action
 
 if TYPE_CHECKING:
+    from models.clue import Clue
     from models.card.card import Card
     from models.player import Player
 

@@ -1,5 +1,5 @@
 from constants.actions import ACTION
-from services.clue_giver import ClueGiver
+from services.clue.clue_giver import ClueGiver
 
 
 def test_build_color(player, card):
