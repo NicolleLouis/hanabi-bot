@@ -1,7 +1,7 @@
 import random
 import pytest
 
-from models.card import Card
+from models.card.card import Card
 
 
 @pytest.fixture

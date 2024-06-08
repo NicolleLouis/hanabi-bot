@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from constants.actions import ACTION
-from models.brain import Brain
-from models.player import Player
-
 from typing import TYPE_CHECKING, Optional
 
-from models.stack import Stack
+from constants.actions import ACTION
+from models.board import Board
+from models.brain import Brain
+from models.deck import Deck
+from models.player import Player
+
 from services.clue_receiver import ClueReceiver
 from services.player_finder import PlayerFinder
 
@@ -21,16 +22,26 @@ class GameException(Exception):
 
 class Game:
     def __init__(self, client: Client):
+        # Meta Infos
         self.client = client
         self.table_id = None
-        self.clue_tokens = 8
+
+        # Players
         self.players = []
         self.own_index = -1
-        self.stacks = []
-        self.discard_pile = []
+
+        # Game fixed infos
+        self.deck = None
+        self.board = None
+        self.suits = None
+
+        # Game state
         self.turn_number = -1
         self.current_player_index = -1
+        self.discard_pile = []
+        self.clue_tokens = 8
 
+        # Services
         self.player_finder = PlayerFinder(self)
         self.clue_receiver = ClueReceiver(self)
         self.brain = Brain(self)
@@ -44,8 +55,9 @@ class Game:
         self.table_id = data["tableID"]
 
         suits_number = 5
-        for suit in range(suits_number):
-            self.stacks.append(Stack(suit))
+        self.suits = list(range(suits_number))
+        self.board = Board(self.suits)
+        self.deck = Deck(self.suits)
 
         self.brain.set_player(self.player_finder.find_self())
 
@@ -53,9 +65,6 @@ class Game:
         print("Players:")
         for player in self.players:
             player.pretty_print()
-        print("Stacks:")
-        for stack in self.stacks:
-            print(stack)
 
     def generate_players(self, player_names):
         for player_index, name in enumerate(player_names):
@@ -63,12 +72,6 @@ class Game:
 
     def get_player(self, player_index) -> Player:
         return self.player_finder.get_player(player_index)
-
-    def get_stack(self, suit):
-        for stack in self.stacks:
-            if stack.suit == suit:
-                return stack
-        raise GameException(f"Stack {suit} not found")
 
     def ready(self):
         self.turn_number = 0
@@ -109,6 +112,7 @@ class Game:
             data["order"],
             data["rank"],
             data["suitIndex"],
+            deck=self.deck
         )
 
     def play(self, data):
@@ -117,7 +121,7 @@ class Game:
         card = player.remove_card_from_hand(order)
         card.set_suit(data["suitIndex"])
         card.set_rank(data["rank"])
-        success = self.get_stack(card.suit).add_card(card)
+        success = self.board.add_card(card.physical_card)
         if success and card.rank == 5:
             self.clue_tokens += 1
 

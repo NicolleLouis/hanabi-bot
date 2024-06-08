@@ -1,6 +1,11 @@
-from typing import List
+from __future__ import annotations
 
-from models.card import Card
+from typing import List, TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from models.deck import Deck
+
+from models.card.card import Card
 
 
 class PlayerException(Exception):
@@ -49,10 +54,11 @@ class Player:
                 return card
         raise PlayerException(f"Card {card_order} not found in hand")
 
-    def add_card_to_hand(self, card_order, card_rank, card_suit) -> None:
+    def add_card_to_hand(self, card_order, card_rank, card_suit, deck: Optional[Deck] = None) -> None:
         card = Card(
             order=card_order,
             rank=card_rank,
             suit=card_suit,
+            deck=deck
         )
         self.hand.append(card)

@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from models.known_info import KnownInfo
+from models.card.known_info import KnownInfo
 
 
 def random_clue_value():
@@ -14,8 +14,8 @@ def random_clue_number():
 
 
 @pytest.fixture
-def known_info() -> KnownInfo:
-    known_info = KnownInfo()
+def known_info(card) -> KnownInfo:
+    known_info = KnownInfo(card)
     if random.choice([True, False]):
         known_info.add_positive_clue(is_color_clue=True, value=random_clue_value())
 

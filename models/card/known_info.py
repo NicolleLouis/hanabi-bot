@@ -1,9 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.card.card import Card
+
+
 class KnownInfoException(Exception):
     pass
 
 
 class KnownInfo:
-    def __init__(self):
+    def __init__(self, card: Card):
+        self.card = card
+
         self.positive_rank_clues = []
         self.negative_rank_clues = []
         self.positive_suit_clues = []
@@ -25,6 +35,7 @@ class KnownInfo:
             self.positive_rank_clues.append(value)
         self.touched = True
 
+        self.update_computed_infos()
         self.check_sanity()
 
     def add_negative_clue(self, is_color_clue: bool, value: int) -> None:
@@ -33,6 +44,7 @@ class KnownInfo:
         else:
             self.negative_rank_clues.append(value)
 
+        self.update_computed_infos()
         self.check_sanity()
 
     def check_sanity(self) -> bool:
@@ -49,3 +61,6 @@ class KnownInfo:
                 raise KnownInfoException(f"Suit {suit} is both positive and negative")
 
         return True
+
+    def update_computed_infos(self):
+        self.card.computed_info.update_from_known_info(self)

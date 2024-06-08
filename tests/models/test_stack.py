@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from models.card import Card
+from models.card.card import Card
 from models.stack import StackException
 
 

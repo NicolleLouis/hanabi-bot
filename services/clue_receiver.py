@@ -6,7 +6,7 @@ from models.clue import Clue
 
 if TYPE_CHECKING:
     from models.game import Game
-    from models.card import Card
+    from models.card.card import Card
     from models.player import Player
 
 

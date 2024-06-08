@@ -6,7 +6,7 @@ from constants.actions import ACTION
 from models.action import Action
 
 if TYPE_CHECKING:
-    from models.card import Card
+    from models.card.card import Card
     from models.player import Player
 
 
