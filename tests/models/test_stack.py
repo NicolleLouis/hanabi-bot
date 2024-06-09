@@ -3,6 +3,7 @@ import random
 import pytest
 
 from models.card.card import Card
+from models.card.physical_card import PhysicalCard
 from models.stack import StackException
 
 
@@ -51,3 +52,14 @@ def test_invalid_card(stack):
     initial_rank = stack.current_rank
     stack.add_card(card)
     assert stack.current_rank == initial_rank
+
+
+def test_get_played_cards(stack):
+    stack.current_rank = 0
+    assert stack.played_cards == []
+
+    for rank in range(1, 6):
+        card = PhysicalCard(stack.suit, rank)
+        stack.add_card(card)
+        assert len(stack.played_cards) == rank
+        assert card in stack.played_cards

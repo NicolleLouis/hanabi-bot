@@ -16,7 +16,9 @@ It follows H-Convention, currently at really dumb level.
   - `cp .env_template .env`
   - `vim .env`
 - Run it:
-  - `make start`
+  - `make single` to run a single bot
+  - `make multi` to run 4 bots at once
+  - You can easily customize the number of bots by changing the `-number` variable in the Makefile
 - In a browser, log on to the website and start a new table.
 - In the pre-game chat window, send a private message to the bot:
   - `/msg [username] /join`
