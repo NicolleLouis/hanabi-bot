@@ -31,12 +31,19 @@ class Player:
     def get_card_by_slot(self, slot_number):
         return self.hand[-slot_number]
 
+    @property
+    def touched_cards(self) -> List[Card]:
+        return [card for card in self.hand if card.touched]
+
+    @property
     def unclued_cards(self) -> List[Card]:
         return [card for card in self.hand if not card.touched]
 
+    @property
     def playable_cards(self):
         return [card for card in self.hand if card.playable]
 
+    @property
     def trash_cards(self):
         return [card for card in self.hand if card.trash]
 
@@ -44,10 +51,10 @@ class Player:
         return len([c for c in self.hand if c.order == card.order]) > 0
 
     def get_finesse(self) -> Card:
-        return self.unclued_cards()[-1]
+        return self.unclued_cards[-1]
 
     def get_chop(self) -> Card:
-        return self.unclued_cards()[0]
+        return self.unclued_cards[0]
 
     def remove_card_from_hand(self, card_order) -> Card:
         card = self.get_card(card_order)

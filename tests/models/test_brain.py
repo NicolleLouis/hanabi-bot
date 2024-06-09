@@ -55,3 +55,31 @@ def test_guess_trash_good_touch_elimination(brain):
     brain.update_playability()
     assert card_1.trash
     assert not card_1.playable
+
+
+def test_no_good_touch_elimination_on_untouched_card(brain):
+    brain.player.add_card_to_hand(0, 1, 0, deck=brain.game.deck)
+    unplayable_card = brain.player.get_card(0)
+
+    for suit in range(1, 5):
+        brain.player.add_card_to_hand(suit, 1, suit, deck=brain.game.deck)
+        brain.clue_receiver.receive_clue(clue=Clue(
+            player_index=brain.player.index,
+            is_color_clue=True,
+            value=suit,
+            card_orders_touched=[suit]
+        ))
+
+    brain.good_touch_elimination()
+    brain.update_playability()
+    assert not unplayable_card.playable
+
+    brain.game.board.add_card(PhysicalCard(rank=1, suit=0))
+    brain.game.board.add_card(PhysicalCard(rank=2, suit=0))
+    brain.game.board.add_card(PhysicalCard(rank=3, suit=0))
+    brain.game.board.add_card(PhysicalCard(rank=4, suit=0))
+
+    brain.good_touch_elimination()
+    brain.update_playability()
+    assert not unplayable_card.playable
+    assert len(unplayable_card.computed_info.possible_cards) == 5

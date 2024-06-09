@@ -25,7 +25,7 @@ class Brain:
     # Main Action loop
     def find_action(self):
         if self.has_playable_cards():
-            return self.play_service.to_card(self.player.playable_cards()[0])
+            return self.play_service.to_card(self.player.playable_cards[0])
 
         if self.game.clue_tokens == 0:
             return self.discard()
@@ -37,7 +37,7 @@ class Brain:
             return self.discard()
 
     def discard(self):
-        trash_cards = self.player.trash_cards()
+        trash_cards = self.player.trash_cards
         if len(trash_cards) > 0:
             return self.discard_service.to_card(trash_cards[-1])
         return self.discard_service.to_chop()
@@ -53,7 +53,7 @@ class Brain:
         return self.game.player_finder
 
     def has_playable_cards(self):
-        return len(self.player.playable_cards()) > 0
+        return len(self.player.playable_cards) > 0
 
     def display_card_options(self):
         print("Card Options:")
@@ -64,7 +64,7 @@ class Brain:
     # ToDo: for the moment only remove card already played and not cards touched in other player hands
     def good_touch_elimination(self):
         played_cards = self.game.board.get_played_cards()
-        for card in self.player.hand:
+        for card in self.player.touched_cards:
             for played_card in played_cards:
                 card.computed_info.remove_possibility(played_card)
 

@@ -1,13 +1,15 @@
+Add computation: is savable (From deck + discard)
+Add save clues (Impact card possibilities)
+Add 2-save clues (Impact card possibilities)
+---
 Handle Strikes
 handle GameOver
 handle playerTimes (ignore)
 ---
-https://hanab.live/shared-replay/1187475
-Add tests Stack get played cards
 Handle 8 clue situation (send stall)
+
 ---
-MultiPLayer issues (Clue mismatch for some reason)
----
-Add computation: is savable (From deck + discard)
-Add save clues (Impact card possibilities)
-Add 2-save clues (Impact card possibilities)
+https://hanab.live/shared-replay/1187947
+Turn 1: Should get 2 1s and not a color clue
+Turn 25: Should not retouch a already touched card
+Turn 53: Should remove b5 from the list of possibilities since it sees it (hand or discard)
