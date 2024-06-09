@@ -1,4 +1,8 @@
+import pytest
+
+from models.card.card import Card
 from models.clue import Clue
+from services.clue.clue_finder import ClueFinderException
 
 
 def test_other_players(clue_finder):
@@ -92,3 +96,10 @@ def test_find_play_clue_case_2(clue_finder):
     for clue in real_clues:
         assert clue in expected_clues
     assert len(real_clues) == len(expected_clues)
+
+
+def test_generate_clue_error_case(clue_finder):
+    fake_card = Card(420, 1, 1)
+
+    with pytest.raises(ClueFinderException):
+        clue_finder.generate_clue(fake_card, True)

@@ -12,6 +12,10 @@ if TYPE_CHECKING:
     from models.game import Game
 
 
+class ClueFinderException(Exception):
+    pass
+
+
 class ClueFinder:
     def __init__(self, player: Player, game: Game):
         self.player = player
@@ -47,7 +51,11 @@ class ClueFinder:
         return playable_cards
 
     def generate_clue(self, card: Card, is_color_clue: bool) -> Clue:
-        player = [player for player in self.game.players if player != self.player][0]
+        other_players = self.other_players()
+        players_with_card = [player for player in other_players if player.has_card(card)]
+        if len(players_with_card) == 0:
+            raise ClueFinderException('Card not found in other players hands')
+        player = players_with_card[0]
         return ClueBuilder.generate_clue(
             player=player,
             is_color_clue=is_color_clue,

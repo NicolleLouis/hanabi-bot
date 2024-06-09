@@ -85,6 +85,7 @@ class Game:
         try:
             if "action" in data:
                 data = data["action"]
+
             self.update_state(data)
 
             if data["type"] != "turn":

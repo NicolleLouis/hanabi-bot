@@ -40,6 +40,9 @@ class Player:
     def trash_cards(self):
         return [card for card in self.hand if card.trash]
 
+    def has_card(self, card):
+        return len([c for c in self.hand if c.order == card.order]) > 0
+
     def get_finesse(self) -> Card:
         return self.unclued_cards()[-1]
 
