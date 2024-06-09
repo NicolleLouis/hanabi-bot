@@ -60,3 +60,7 @@ class Card:
     @property
     def playable(self):
         return self.computed_info.playable
+
+    @property
+    def trash(self):
+        return self.computed_info.trash

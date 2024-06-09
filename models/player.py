@@ -37,6 +37,9 @@ class Player:
     def playable_cards(self):
         return [card for card in self.hand if card.playable]
 
+    def trash_cards(self):
+        return [card for card in self.hand if card.trash]
+
     def get_finesse(self) -> Card:
         return self.unclued_cards()[-1]
 

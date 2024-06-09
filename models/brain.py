@@ -30,7 +30,13 @@ class Brain:
         if len(play_clues) > 0:
             return random.choice(play_clues).to_action()
         else:
-            return self.discard_service.to_chop()
+            return self.discard()
+
+    def discard(self):
+        trash_cards = self.player.trash_cards()
+        if len(trash_cards) > 0:
+            return self.discard_service.to_card(trash_cards[-1])
+        return self.discard_service.to_chop()
 
     def set_player(self, player: Player):
         self.player = player

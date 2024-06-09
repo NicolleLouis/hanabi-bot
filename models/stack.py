@@ -40,4 +40,4 @@ class Stack:
 
     @property
     def played_cards(self):
-        return [PhysicalCard(suit=self.suit, rank=rank) for rank in range(1, self.current_rank)]
+        return [PhysicalCard(suit=self.suit, rank=rank) for rank in range(1, self.current_rank+1)]

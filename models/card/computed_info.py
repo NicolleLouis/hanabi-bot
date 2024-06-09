@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 class ComputedInfo:
     def __init__(self, deck: Optional[Deck] = None):
         self.touched = False
+        self.trash = False
         self.playable = False
         self.possible_cards: set = set()
 
@@ -57,8 +58,17 @@ class ComputedInfo:
         for positive_suit in known_info.positive_suit_clues:
             self.possible_cards = {card for card in self.possible_cards if card.suit == positive_suit}
 
+    def set_trash(self):
+        self.trash = True
+        self.playable = False
+
     def update_playability(self, board: Board):
-        if self.playable:
+        if self.trash:
+            return
+        if len(self.possible_cards) == 0:
+            self.set_trash()
             return
 
+        if self.playable:
+            return
         self.playable = all(board.is_card_valid(card) for card in self.possible_cards)
