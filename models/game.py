@@ -94,7 +94,6 @@ class Game:
             if self.current_player_index != self.own_index:
                 return
 
-            print(data)
             self.choose_action()
         except Exception as e:
             print(f"Error: {e}")

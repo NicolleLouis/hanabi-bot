@@ -26,6 +26,10 @@ class Brain:
     def find_action(self):
         if self.has_playable_cards():
             return self.play_service.to_card(self.player.playable_cards()[0])
+
+        if self.game.clue_tokens == 0:
+            return self.discard()
+
         play_clues = self.clue_finder.find_play_clues()
         if len(play_clues) > 0:
             return random.choice(play_clues).to_action()
