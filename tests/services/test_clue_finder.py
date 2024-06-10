@@ -123,3 +123,40 @@ def test_clue_finder_rank_card(clue_finder):
 
     player.get_card(2).computed_info.touched = True
     assert clue_finder.clue_score(clue) == 0
+
+
+def test_newly_touched_cards(clue_finder):
+    player = clue_finder.player
+    player.add_card_to_hand(0, 1, 1)
+    player.add_card_to_hand(1, 2, 2)
+    player.add_card_to_hand(2, 1, 1)
+    clue = Clue(
+        player_index=player.index,
+        is_color_clue=True,
+        value=1,
+        card_orders_touched=[0, 2]
+    )
+    assert len(clue_finder.newly_touched_cards(clue)) == 2
+
+    player.get_card(0).computed_info.touched = True
+    assert len(clue_finder.newly_touched_cards(clue)) == 1
+
+    player.get_card(2).computed_info.touched = True
+    assert len(clue_finder.newly_touched_cards(clue)) == 0
+
+
+def test_clue_follow_good_touch(clue_finder):
+    player = clue_finder.player
+    player.add_card_to_hand(0, 1, 1)
+    player.add_card_to_hand(1, 2, 2)
+    player.add_card_to_hand(2, 1, 1)
+    clue = Clue(
+        player_index=player.index,
+        is_color_clue=True,
+        value=1,
+        card_orders_touched=[0, 2]
+    )
+    assert clue_finder.clue_follow_good_touch(clue)
+
+    clue_finder.game.board.add_card(Card(1, 1, 1))
+    assert not clue_finder.clue_follow_good_touch(clue)

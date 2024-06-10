@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import random
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 
 from services.clue.clue_finder import ClueFinder
 from services.clue.clue_receiver import ClueReceiver
@@ -9,6 +8,7 @@ from services.discard import DiscardService
 from services.play import PlayService
 
 if TYPE_CHECKING:
+    from models.card.physical_card import PhysicalCard
     from models.game import Game
     from models.player import Player
 
@@ -63,7 +63,7 @@ class Brain:
             card.computed_info.pretty_print()
 
     # Beware touched cards by ourselves (Might be duplicated)
-    def get_known_cards(self):
+    def get_known_cards(self) -> List[PhysicalCard]:
         played_cards = self.game.board.get_played_cards()
         touched_cards = []
         for player in self.game.players:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from time import sleep
 from typing import TYPE_CHECKING, Optional
 
 from constants.actions import ACTION
@@ -157,6 +158,7 @@ class Game:
         self.current_player_index = data["currentPlayerIndex"]
 
     def submit_action(self, action: Action):
+        sleep(1)
         body = {
             "tableID": self.table_id,
             "type": action.action_type,

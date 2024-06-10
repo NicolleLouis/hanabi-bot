@@ -21,6 +21,10 @@ class ClueFinder:
         self.player = player
         self.game = game
 
+    @property
+    def brain(self):
+        return self.game.brain
+
     def other_players(self):
         return [player for player in self.game.players if player != self.player]
 
@@ -33,6 +37,7 @@ class ClueFinder:
                 play_clues.append(self.generate_clue(card, is_color_clue=True))
             if self.is_card_rank_focusable(card):
                 play_clues.append(self.generate_clue(card, is_color_clue=False))
+        play_clues = [clue for clue in play_clues if self.clue_follow_good_touch(clue)]
         return play_clues
 
     def filter_touchable_cards(self, cards: List[Card]):
@@ -76,13 +81,20 @@ class ClueFinder:
         )
         return ClueReceiver(self.game).find_focus(rank_clue) == card
 
-    # ToDo code me and plug me
     def clue_follow_good_touch(self, clue: Clue) -> bool:
-        raise NotImplementedError
+        newly_touched_cards = self.newly_touched_cards(clue)
+        known_cards = self.brain.get_known_cards()
+        for card in newly_touched_cards:
+            if card.physical_card in known_cards:
+                return False
+        return True
+
+    def newly_touched_cards(self, clue: Clue) -> List[Card]:
+        clued_player = self.game.player_finder.get_player(clue.player_index)
+        touched_cards = [card for card in clued_player.hand if card.order in clue.card_orders_touched]
+        return [card for card in touched_cards if not card.touched]
 
     # 1 point per card newly touched
     def clue_score(self, clue: Clue) -> int:
-        clued_player = self.game.player_finder.get_player(clue.player_index)
-        touched_cards = [card for card in clued_player.hand if card.order in clue.card_orders_touched]
-        newly_touched_card = [card for card in touched_cards if not card.touched]
+        newly_touched_card = self.newly_touched_cards(clue)
         return len(newly_touched_card)
