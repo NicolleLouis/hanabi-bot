@@ -37,8 +37,19 @@ class ClueFinder:
                 play_clues.append(self.generate_clue(card, is_color_clue=True))
             if self.is_card_rank_focusable(card):
                 play_clues.append(self.generate_clue(card, is_color_clue=False))
-        play_clues = [clue for clue in play_clues if self.clue_follow_good_touch(clue)]
-        return play_clues
+        valid_play_clues = self.filter_valid_clues(play_clues)
+        return valid_play_clues
+
+    def filter_valid_clues(self, clues: List[Clue]) -> List[Clue]:
+        validation_function = [
+            self.clue_follow_minimum_value,
+            self.clue_follow_good_touch,
+            self.clue_should_not_duplicate_cards,
+        ]
+        filtered_clues = clues
+        for function in validation_function:
+            filtered_clues = [clue for clue in filtered_clues if function(clue)]
+        return filtered_clues
 
     def filter_touchable_cards(self, cards: List[Card]):
         touchable_cards = []
@@ -89,9 +100,20 @@ class ClueFinder:
                 return False
         return True
 
-    def newly_touched_cards(self, clue: Clue) -> List[Card]:
+    def clue_follow_minimum_value(self, clue: Clue) -> bool:
+        return len(self.newly_touched_cards(clue)) > 0
+
+    def clue_should_not_duplicate_cards(self, clue: Clue) -> bool:
+        touched_cards = self.touched_cards(clue)
+        touched_physical_cards = [card.physical_card for card in touched_cards]
+        return len(touched_physical_cards) == len(set(touched_physical_cards))
+
+    def touched_cards(self, clue: Clue) -> List[Card]:
         clued_player = self.game.player_finder.get_player(clue.player_index)
-        touched_cards = [card for card in clued_player.hand if card.order in clue.card_orders_touched]
+        return [card for card in clued_player.hand if card.order in clue.card_orders_touched]
+
+    def newly_touched_cards(self, clue: Clue) -> List[Card]:
+        touched_cards = self.touched_cards(clue)
         return [card for card in touched_cards if not card.touched]
 
     # 1 point per card newly touched
