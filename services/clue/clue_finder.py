@@ -75,3 +75,6 @@ class ClueFinder:
             is_color_clue=False
         )
         return ClueReceiver(self.game).find_focus(rank_clue) == card
+
+    def clue_follow_good_touch(self, clue: Clue) -> bool:
+        return ClueReceiver(self.game).find_focus(clue) == clue.card

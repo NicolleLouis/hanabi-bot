@@ -61,9 +61,16 @@ class Brain:
             print(card)
             card.computed_info.pretty_print()
 
-    # ToDo: for the moment only remove card already played and not cards touched in other player hands
-    def good_touch_elimination(self):
+    # Beware touched cards by ourselves (Might be duplicated)
+    def get_known_cards(self):
         played_cards = self.game.board.get_played_cards()
+        touched_cards = []
+        for player in self.game.players:
+            touched_cards.extend([card.physical_card for card in player.touched_cards])
+        return played_cards + touched_cards
+
+    def good_touch_elimination(self):
+        played_cards = self.get_known_cards()
         for card in self.player.touched_cards:
             for played_card in played_cards:
                 card.computed_info.remove_possibility(played_card)
