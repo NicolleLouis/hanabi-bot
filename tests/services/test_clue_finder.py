@@ -103,3 +103,23 @@ def test_generate_clue_error_case(clue_finder):
 
     with pytest.raises(ClueFinderException):
         clue_finder.generate_clue(fake_card, True)
+
+
+def test_clue_finder_rank_card(clue_finder):
+    player = clue_finder.player
+    player.add_card_to_hand(0, 1, 1)
+    player.add_card_to_hand(1, 2, 2)
+    player.add_card_to_hand(2, 1, 1)
+    clue = Clue(
+        player_index=player.index,
+        is_color_clue=True,
+        value=1,
+        card_orders_touched=[0, 2]
+    )
+    assert clue_finder.clue_score(clue) == 2
+
+    player.get_card(0).computed_info.touched = True
+    assert clue_finder.clue_score(clue) == 1
+
+    player.get_card(2).computed_info.touched = True
+    assert clue_finder.clue_score(clue) == 0

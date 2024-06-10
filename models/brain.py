@@ -32,7 +32,8 @@ class Brain:
 
         play_clues = self.clue_finder.find_play_clues()
         if len(play_clues) > 0:
-            return random.choice(play_clues).to_action()
+            ordered_play_clues = sorted(play_clues, key=self.clue_finder.clue_score, reverse=True)
+            return ordered_play_clues[0].to_action()
         else:
             return self.discard()
 

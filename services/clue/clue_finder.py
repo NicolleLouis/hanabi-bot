@@ -76,5 +76,13 @@ class ClueFinder:
         )
         return ClueReceiver(self.game).find_focus(rank_clue) == card
 
+    # ToDo code me and plug me
     def clue_follow_good_touch(self, clue: Clue) -> bool:
-        return ClueReceiver(self.game).find_focus(clue) == clue.card
+        raise NotImplementedError
+
+    # 1 point per card newly touched
+    def clue_score(self, clue: Clue) -> int:
+        clued_player = self.game.player_finder.get_player(clue.player_index)
+        touched_cards = [card for card in clued_player.hand if card.order in clue.card_orders_touched]
+        newly_touched_card = [card for card in touched_cards if not card.touched]
+        return len(newly_touched_card)

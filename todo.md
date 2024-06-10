@@ -10,6 +10,5 @@ Handle 8 clue situation (send stall)
 
 ---
 https://hanab.live/shared-replay/1187947
-Turn 1: Should get 2 1s and not a color clue
 Turn 25: Should not retouch a already touched card
 Turn 53: Should remove b5 from the list of possibilities since it sees it (hand or discard)
