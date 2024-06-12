@@ -58,20 +58,26 @@ def test_filter_touchable_cards(clue_finder):
 def test_find_play_clue_case_1(clue_finder):
     other_player = clue_finder.other_players()[0]
     other_player.add_card_to_hand(0, 1, 1)
-    other_player.add_card_to_hand(1, 1, 1)
+    other_player.add_card_to_hand(1, 1, 2)
     expected_clues = [
-        Clue(
-            player_index=other_player.index,
-            is_color_clue=True,
-            value=1,
-            card_orders_touched=[0, 1],
-        ),
         Clue(
             player_index=other_player.index,
             is_color_clue=False,
             value=1,
             card_orders_touched=[0, 1],
-        )
+        ),
+        Clue(
+            player_index=other_player.index,
+            is_color_clue=True,
+            value=1,
+            card_orders_touched=[0],
+        ),
+        Clue(
+            player_index=other_player.index,
+            is_color_clue=True,
+            value=2,
+            card_orders_touched=[1],
+        ),
     ]
     real_clues = clue_finder.find_play_clues()
     for clue in real_clues:

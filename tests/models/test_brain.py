@@ -106,3 +106,77 @@ def test_get_known_cards(brain):
         PhysicalCard(rank=1, suit=1),
         PhysicalCard(rank=1, suit=2),
     ]
+
+
+def test_visible_cards(brain):
+    assert brain.visible_cards() == []
+
+    brain.player.add_card_to_hand(0, 1, 1, deck=brain.game.deck)
+    assert brain.visible_cards() == []
+
+    brain.game.board.add_card(PhysicalCard(rank=1, suit=0))
+    assert brain.visible_cards() == [PhysicalCard(rank=1, suit=0)]
+
+    next_player = brain.player_finder.next_seated_player()
+    next_player.add_card_to_hand(1, 1, 2, deck=brain.game.deck)
+    assert len(brain.visible_cards()) == 2
+    assert PhysicalCard(rank=1, suit=2) in brain.visible_cards()
+
+    brain.game.discard_pile.append(PhysicalCard(rank=1, suit=3))
+    assert len(brain.visible_cards()) == 3
+    assert PhysicalCard(rank=1, suit=3) in brain.visible_cards()
+
+
+def test_remaining_cards(brain):
+    assert len(brain.remaining_cards()) == 50
+
+    brain.player.add_card_to_hand(0, 1, 1, deck=brain.game.deck)
+    assert len(brain.remaining_cards()) == 50
+
+    brain.game.board.add_card(PhysicalCard(rank=1, suit=1))
+    assert len(brain.remaining_cards()) == 49
+
+    next_player = brain.player_finder.next_seated_player()
+    next_player.add_card_to_hand(1, 1, 1, deck=brain.game.deck)
+    assert len(brain.remaining_cards()) == 48
+
+    brain.game.discard_pile.append(PhysicalCard(rank=1, suit=1))
+    assert len(brain.remaining_cards()) == 47
+    assert PhysicalCard(rank=1, suit=1) not in brain.remaining_cards()
+
+
+def test_visible_card_elimination(brain):
+    brain.player.add_card_to_hand(0, -1, -1, deck=brain.game.deck)
+    card = brain.player.get_card(0)
+    clue = Clue(
+        player_index=brain.player.index,
+        is_color_clue=True,
+        value=0,
+        card_orders_touched=[0]
+    )
+    brain.clue_receiver.receive_clue(clue=clue)
+    assert card.computed_info.possible_cards == {
+        PhysicalCard(rank=1, suit=0),
+        PhysicalCard(rank=2, suit=0),
+        PhysicalCard(rank=3, suit=0),
+        PhysicalCard(rank=4, suit=0),
+        PhysicalCard(rank=5, suit=0)
+    }
+
+    brain.game.board.add_card(PhysicalCard(rank=1, suit=0))
+    brain.game.board.add_card(PhysicalCard(rank=2, suit=0))
+    brain.game.board.add_card(PhysicalCard(rank=3, suit=0))
+
+    brain.good_touch_elimination()
+    assert card.computed_info.possible_cards == {
+        PhysicalCard(rank=4, suit=0),
+        PhysicalCard(rank=5, suit=0)
+    }
+
+    next_player = brain.player_finder.next_seated_player()
+    next_player.add_card_to_hand(1, 5, 0, deck=brain.game.deck)
+    brain.visible_cards_elimination()
+
+    assert card.computed_info.possible_cards == {
+        PhysicalCard(rank=4, suit=0)
+    }

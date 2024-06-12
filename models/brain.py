@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Optional, List
 
+from models.card.card import Card
 from services.clue.clue_finder import ClueFinder
 from services.clue.clue_receiver import ClueReceiver
 from services.discard import DiscardService
@@ -76,6 +78,32 @@ class Brain:
             for played_card in played_cards:
                 card.computed_info.remove_possibility(played_card)
 
+    def visible_cards(self):
+        visible_cards = self.game.discard_pile + self.game.board.get_played_cards()
+        for player in self.game.players:
+            if player != self.player:
+                visible_cards.extend(player.hand)
+
+        visible_cards = [
+            card.physical_card if isinstance(card, Card) else card for card in visible_cards
+        ]
+        return visible_cards
+
+    def remaining_cards(self):
+        deck_counter = Counter(self.game.deck.cards)
+        visible_counter = Counter(self.visible_cards())
+
+        remaining_counter = deck_counter - visible_counter
+
+        return list(remaining_counter.elements())
+
+    def visible_cards_elimination(self):
+        for card in self.player.hand:
+            card_possibilities = set(card.computed_info.possible_cards)
+            for possible_card in card_possibilities:
+                if possible_card not in self.remaining_cards():
+                    card.computed_info.remove_possibility(possible_card)
+
     def update_playability(self):
         for card in self.player.hand:
             card.computed_info.update_playability(self.game.board)
@@ -83,4 +111,5 @@ class Brain:
     def receive_clue(self, data):
         self.clue_receiver.receive_clue(data=data)
         self.good_touch_elimination()
+        self.visible_cards_elimination()
         self.update_playability()
