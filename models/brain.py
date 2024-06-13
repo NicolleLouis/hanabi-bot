@@ -41,6 +41,13 @@ class Brain:
         )
         return self.choose_action(actions)
 
+    def display_thoughts(self, turn):
+        for thought in self.memory:
+            if thought.turn == turn:
+                thought.pretty_print()
+                return
+        print("No thoughts found for turn", turn)
+
     def find_potential_actions(self) -> List[Action]:
         potential_actions = []
         potential_actions.extend(self.find_play_actions())

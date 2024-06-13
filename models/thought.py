@@ -10,3 +10,8 @@ class Thought:
     def __init__(self, turn: int, actions: List[Action]):
         self.turn = turn
         self.actions = actions
+
+    def pretty_print(self):
+        print(f"Turn: {self.turn}")
+        for action in self.actions:
+            print(action)

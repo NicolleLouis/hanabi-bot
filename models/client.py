@@ -1,10 +1,13 @@
 import json
 
-
 from models.game import Game
 from services.chat import ChatService
 from services.client import ClientService
 from websocket._app import WebSocketApp
+
+
+class ClientException(Exception):
+    pass
 
 
 class Client:
@@ -103,7 +106,7 @@ class Client:
     def chat(self, data):
         self.chat_service.receive_message(data)
 
-    def join_table(self, data):
+    def join_table(self, data, command_arguments):
         try:
             table_id = self.service.find_table(data)
         except Exception:
@@ -179,6 +182,13 @@ class Client:
             },
         )
         del self.games[data["tableID"]]
+
+    def get_game_by_player(self, sender):
+        for game in self.games.values():
+            for player in game.players:
+                if player.name == sender:
+                    return game
+        raise ClientException(f"Game not found for player {sender}")
 
     # ---------------------------------
     # Website Command Handlers (Outputs)
