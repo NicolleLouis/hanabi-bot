@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import random
 from collections import Counter
 from typing import TYPE_CHECKING, Optional, List
 
+from constants.action_source import ActionSource
+from models.action import Action
 from models.card.card import Card
+from models.thought import Thought
 from services.clue.clue_finder import ClueFinder
 from services.clue.clue_receiver import ClueReceiver
 from services.discard import DiscardService
@@ -23,21 +27,57 @@ class Brain:
         self.play_service: Optional[PlayService] = None
         self.clue_receiver: ClueReceiver = ClueReceiver(game)
         self.clue_finder: Optional[ClueFinder] = None
+        self.memory: List[Thought] = []
 
     # Main Action loop
-    def find_action(self):
-        if self.has_playable_cards():
-            return self.play_service.to_card(self.player.playable_cards[0])
+    def find_action(self, turn):
+        self.update_state()
+        actions = self.find_potential_actions()
+        self.memory.append(
+            Thought(
+                turn=turn,
+                actions=actions
+            )
+        )
+        return self.choose_action(actions)
 
-        if self.game.clue_tokens == 0:
-            return self.discard()
+    def find_potential_actions(self) -> List[Action]:
+        potential_actions = []
+        potential_actions.extend(self.find_play_actions())
+        potential_actions.extend(self.find_discard_actions())
+        potential_actions.extend(self.find_play_clues())
+        return potential_actions
 
+    def find_play_actions(self) -> List[Action]:
+        play_actions = []
+        for card in self.player.hand:
+            if card.computed_info.playable:
+                play_actions.append(self.play_service.to_card(card, 1))
+        return play_actions
+
+    def find_discard_actions(self) -> List[Action]:
+        discard_actions = [self.discard_service.to_chop(-1)]
+        for card in self.player.trash_cards:
+            discard_actions.append(self.discard_service.to_card(card, 0))
+        return discard_actions
+
+    def find_play_clues(self) -> List[Action]:
         play_clues = self.clue_finder.find_play_clues()
-        if len(play_clues) > 0:
-            ordered_play_clues = sorted(play_clues, key=self.clue_finder.clue_score, reverse=True)
-            return ordered_play_clues[0].to_action()
-        else:
-            return self.discard()
+        play_clue_actions = []
+        for clue in play_clues:
+            play_clue_actions.append(clue.to_action(ActionSource.PLAY_CLUE))
+        return play_clue_actions
+
+    def choose_action(self, actions: List[Action]) -> Action:
+        if self.game.clue_tokens == 0:
+            impossible_actions = [
+                ActionSource.PLAY_CLUE,
+                ActionSource.SAVE_CLUE
+            ]
+            actions = [action for action in actions if action.source not in impossible_actions]
+        max_score = max([action.score for action in actions])
+        best_actions = [action for action in actions if action.score == max_score]
+        return random.choice(best_actions)
 
     def discard(self):
         trash_cards = self.player.trash_cards
@@ -111,6 +151,9 @@ class Brain:
 
     def receive_clue(self, data):
         self.clue_receiver.receive_clue(data=data)
+        self.update_state()
+
+    def update_state(self):
         self.good_touch_elimination()
         self.visible_cards_elimination()
         self.update_playability()

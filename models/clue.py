@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from constants.action_source import ActionSource
 from constants.actions import ACTION
 from models.action import Action
 
@@ -15,7 +16,8 @@ class Clue:
             player_index: Optional[int] = None,
             is_color_clue: Optional[bool] = None,
             value: Optional[int] = None,
-            card_orders_touched: Optional[List[int]] = None
+            card_orders_touched: Optional[List[int]] = None,
+            score: Optional[int] = None,
     ):
         self.check_legality(
             data=data,
@@ -40,6 +42,8 @@ class Clue:
             self.value = value
         if card_orders_touched is not None:
             self.card_orders_touched = card_orders_touched
+
+        self.score = score
 
     def __str__(self):
         return f"Clue: To:{self.player_index} - is_color:{self.is_color_clue} - value:{self.value}"
@@ -76,9 +80,15 @@ class Clue:
         if card_orders_touched is None:
             raise ClueException("card_orders_touched is required")
 
-    def to_action(self) -> Action:
+    def to_action(self, source: Optional[ActionSource] = None) -> Action:
         if self.is_color_clue:
             action_type = ACTION.COLOR_CLUE
         else:
             action_type = ACTION.RANK_CLUE
-        return Action(action_type=action_type, target=self.player_index, value=self.value)
+        return Action(
+            action_type=action_type,
+            target=self.player_index,
+            value=self.value,
+            source=source,
+            score=self.score,
+        )

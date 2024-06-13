@@ -38,7 +38,13 @@ class ClueFinder:
             if self.is_card_rank_focusable(card):
                 play_clues.append(self.generate_clue(card, is_color_clue=False))
         valid_play_clues = self.filter_valid_clues(play_clues)
-        return valid_play_clues
+        scored_play_clues = self.score_clues(valid_play_clues)
+        return scored_play_clues
+
+    def score_clues(self, clues: List[Clue]) -> List[Clue]:
+        for clue in clues:
+            clue.score = self.clue_score(clue)
+        return clues
 
     def filter_valid_clues(self, clues: List[Clue]) -> List[Clue]:
         validation_function = [
