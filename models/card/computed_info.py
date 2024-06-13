@@ -65,10 +65,17 @@ class ComputedInfo:
     def update_playability(self, board: Board):
         if self.trash:
             return
-        if len(self.possible_cards) == 0:
+        if self.is_trash(board):
             self.set_trash()
             return
 
         if self.playable:
             return
         self.playable = all(board.is_card_valid(card) for card in self.possible_cards)
+
+    def is_trash(self, board: Board):
+        if len(self.possible_cards) == 0:
+            return True
+
+        if all(board.is_already_played(card) for card in self.possible_cards):
+            return True

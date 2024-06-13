@@ -76,7 +76,8 @@ class Brain:
         played_cards = self.get_known_cards()
         for card in self.player.touched_cards:
             for played_card in played_cards:
-                card.computed_info.remove_possibility(played_card)
+                if card.physical_card != played_card:
+                    card.computed_info.remove_possibility(played_card)
 
     def visible_cards(self):
         visible_cards = self.game.discard_pile + self.game.board.get_played_cards()

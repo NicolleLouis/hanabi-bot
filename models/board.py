@@ -8,6 +8,10 @@ if TYPE_CHECKING:
 from models.stack import Stack
 
 
+class BoardException(Exception):
+    pass
+
+
 class Board:
     def __init__(self, suits: Optional[List[int]] = None):
         self.stacks: List[Stack] = []
@@ -24,10 +28,18 @@ class Board:
         return False
 
     def is_card_valid(self, card: PhysicalCard):
+        stack = self.get_stack(card.suit)
+        return stack.is_card_valid(card)
+
+    def get_stack(self, suit: int):
         for stack in self.stacks:
-            if stack.is_card_valid(card):
-                return True
-        return False
+            if stack.suit == suit:
+                return stack
+        raise BoardException(f"Stack with suit {suit} not found")
+
+    def is_already_played(self, card: PhysicalCard):
+        stack = self.get_stack(card.suit)
+        return card in stack.played_cards
 
     def get_played_cards(self):
         played_cards = []
