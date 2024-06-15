@@ -8,3 +8,6 @@ Handle 8 clue situation (send stall)
 Handle Strikes
 handle GameOver
 handle playerTimes (ignore)
+---
+https://hanab.live/shared-replay/1192370#8
+Focus error?
