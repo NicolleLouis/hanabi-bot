@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import Optional, List
 
-if TYPE_CHECKING:
-    from models.card.physical_card import PhysicalCard
-
+from models.card.physical_card import PhysicalCard
 from models.stack import Stack
 
 
@@ -31,7 +29,7 @@ class Board:
         stack = self.get_stack(card.suit)
         return stack.is_card_valid(card)
 
-    def get_stack(self, suit: int):
+    def get_stack(self, suit: int) -> Stack:
         for stack in self.stacks:
             if stack.suit == suit:
                 return stack
@@ -46,3 +44,14 @@ class Board:
         for stack in self.stacks:
             played_cards.extend(stack.played_cards)
         return played_cards
+
+    def get_playable_rank(self, suit: int) -> Optional[int]:
+        stack = self.get_stack(suit)
+        return stack.get_playable_rank()
+
+    def get_playable_suits(self, rank: int) -> Optional[List[int]]:
+        playable_suits = []
+        for stack in self.stacks:
+            if stack.is_card_valid(PhysicalCard(suit=stack.suit, rank=rank)):
+                playable_suits.append(stack.suit)
+        return playable_suits

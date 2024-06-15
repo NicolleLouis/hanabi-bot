@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional
 
+from models.card.physical_card import PhysicalCard
 from models.clue import Clue
 
 if TYPE_CHECKING:
@@ -27,11 +28,36 @@ class ClueReceiver:
         self.analyse_clue(clue, focus)
         self.save_clue_information(clue)
 
-    # ToDo: add save clues
     def analyse_clue(self, clue: Clue, focus: Card) -> None:
         chop = self.get_player(clue).get_chop()
         if focus != chop:
-            focus.computed_info.playable = True
+            self.compute_possible_play_cards(focus, clue)
+        if focus == chop:
+            self.compute_possible_save_cards(focus, clue)
+
+    def compute_possible_play_cards(self, card: Card, clue: Clue):
+        if clue.is_color_clue:
+            playable_rank = self.game.board.get_playable_rank(clue.value)
+            if playable_rank is None:
+                print("Did not understand this play clue")
+                return
+            card.set_known(suit=clue.value, rank=playable_rank)
+        else:
+            playable_suits = self.game.board.get_playable_suits(clue.value)
+            print(playable_suits)
+            if len(playable_suits) == 0:
+                print("Did not understand this play clue")
+                return
+            if len(playable_suits) == 1:
+                card.set_known(suit=playable_suits[0], rank=clue.value)
+            else:
+                possibilities = [PhysicalCard(suit=suit, rank=clue.value) for suit in playable_suits]
+                card.set_among_possibilities(possibilities)
+        card.computed_info.playable = True
+
+    # ToDo add me
+    def compute_possible_save_cards(self, card, clue):
+        pass
 
     def get_player(self, clue) -> Player:
         return self.game.player_finder.get_player(clue.player_index)

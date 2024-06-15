@@ -4,9 +4,10 @@ from models.card.computed_info import ComputedInfo
 from models.card.known_info import KnownInfo
 from models.card.physical_card import PhysicalCard
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List
 
 if TYPE_CHECKING:
+    from models.board import Board
     from models.deck import Deck
 
 
@@ -23,6 +24,7 @@ class Card:
             suit=suit,
             rank=rank
         )
+        self.is_known = False
         self.known_info = KnownInfo(self)
         self.computed_info = ComputedInfo(deck=deck)
 
@@ -61,6 +63,26 @@ class Card:
     def playable(self):
         return self.computed_info.playable
 
+    def set_playable(self, playable: bool) -> None:
+        self.computed_info.playable = playable
+
     @property
     def trash(self):
         return self.computed_info.trash
+
+    def set_known(self, suit: int, rank: int):
+        self.is_known = True
+        self.set_rank(rank)
+        self.set_suit(suit)
+
+    def update_playability(self, board: Board):
+        if self.is_known:
+            if board.is_card_valid(self.physical_card):
+                self.set_playable(True)
+            else:
+                self.set_playable(False)
+            return
+        self.computed_info.update_playability(board)
+
+    def set_among_possibilities(self, possibilities: List[PhysicalCard]):
+        self.computed_info.set_among_possibilities(set(possibilities))

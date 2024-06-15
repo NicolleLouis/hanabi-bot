@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-
 if TYPE_CHECKING:
     from models.board import Board
     from models.card.physical_card import PhysicalCard
@@ -79,3 +78,9 @@ class ComputedInfo:
 
         if all(board.is_already_played(card) for card in self.possible_cards):
             return True
+
+    def set_among_possibilities(self, possibilities: set[PhysicalCard]):
+        initial_possibilities = set(self.possible_cards)
+        for possibility in initial_possibilities:
+            if possibility not in possibilities:
+                self.remove_possibility(possibility)

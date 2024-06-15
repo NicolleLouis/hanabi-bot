@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from models.card.physical_card import PhysicalCard
 
 
@@ -41,3 +43,8 @@ class Stack:
     @property
     def played_cards(self):
         return [PhysicalCard(suit=self.suit, rank=rank) for rank in range(1, self.current_rank+1)]
+
+    def get_playable_rank(self) -> Optional[int]:
+        if self.current_rank == 5:
+            return None
+        return self.current_rank + 1

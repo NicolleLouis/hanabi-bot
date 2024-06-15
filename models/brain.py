@@ -154,7 +154,7 @@ class Brain:
 
     def update_playability(self):
         for card in self.player.hand:
-            card.computed_info.update_playability(self.game.board)
+            card.update_playability(self.game.board)
 
     def receive_clue(self, data):
         self.clue_receiver.receive_clue(data=data)

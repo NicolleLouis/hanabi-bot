@@ -1,3 +1,5 @@
+from models.card.card import Card
+from models.card.physical_card import PhysicalCard
 from models.clue import Clue
 from services.clue.clue_receiver import ClueReceiver
 
@@ -100,3 +102,85 @@ def test_focus_only_touched_card_case(game):
     focus = clue_receiver.find_focus(clue)
     expected_focus = player.get_card(3)
     assert focus == expected_focus
+
+
+def test_compute_possible_play_cards_case_color_clue_successful(game):
+    card = Card(0, -1, -1, game.deck)
+    clue = Clue(
+        player_index=0,
+        is_color_clue=True,
+        value=0,
+        card_orders_touched=[0]
+    )
+    clue_receiver = ClueReceiver(game)
+    clue_receiver.compute_possible_play_cards(card, clue)
+    assert card.playable
+    assert card.suit == 0
+    assert card.rank == 1
+    assert card.is_known
+
+
+def test_compute_possible_play_cards_case_color_clue_unsuccessful(game):
+    card = Card(0, -1, -1, game.deck)
+    clue = Clue(
+        player_index=0,
+        is_color_clue=True,
+        value=0,
+        card_orders_touched=[0]
+    )
+    game.board.add_card(PhysicalCard(0, 1))
+    game.board.add_card(PhysicalCard(0, 2))
+    game.board.add_card(PhysicalCard(0, 3))
+    game.board.add_card(PhysicalCard(0, 4))
+    game.board.add_card(PhysicalCard(0, 5))
+
+    clue_receiver = ClueReceiver(game)
+    clue_receiver.compute_possible_play_cards(card, clue)
+    assert not card.playable
+    assert not card.is_known
+
+
+def test_compute_possible_play_cards_case_rank_clue_successful(game):
+    card = Card(0, -1, -1, game.deck)
+    clue = Clue(
+        player_index=0,
+        is_color_clue=False,
+        value=1,
+        card_orders_touched=[0]
+    )
+    clue_receiver = ClueReceiver(game)
+    clue_receiver.compute_possible_play_cards(card, clue)
+    assert card.playable
+    assert not card.is_known
+    assert len(card.computed_info.possible_cards) == 5
+
+    game.board.add_card(PhysicalCard(0, 1))
+    game.board.add_card(PhysicalCard(1, 1))
+    game.board.add_card(PhysicalCard(2, 1))
+    game.board.add_card(PhysicalCard(3, 1))
+
+    clue_receiver.compute_possible_play_cards(card, clue)
+    assert card.playable
+    assert card.is_known
+    assert card.suit == 4
+    assert card.rank == 1
+
+
+def test_compute_possible_play_cards_case_rank_clue_unsuccessful(game):
+    card = Card(0, -1, -1, game.deck)
+    clue = Clue(
+        player_index=0,
+        is_color_clue=False,
+        value=1,
+        card_orders_touched=[0]
+    )
+    clue_receiver = ClueReceiver(game)
+
+    game.board.add_card(PhysicalCard(0, 1))
+    game.board.add_card(PhysicalCard(1, 1))
+    game.board.add_card(PhysicalCard(2, 1))
+    game.board.add_card(PhysicalCard(3, 1))
+    game.board.add_card(PhysicalCard(4, 1))
+
+    clue_receiver.compute_possible_play_cards(card, clue)
+    assert not card.playable

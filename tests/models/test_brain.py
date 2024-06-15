@@ -85,6 +85,7 @@ def test_no_good_touch_elimination_on_untouched_card(brain):
     assert len(unplayable_card.computed_info.possible_cards) == 5
 
 
+# ToDo Random fails here
 def test_get_known_cards(brain):
     assert brain.get_known_cards() == []
 
