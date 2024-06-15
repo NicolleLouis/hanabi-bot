@@ -117,7 +117,7 @@ class Game:
         action[data["type"]](data)
 
     def choose_action(self) -> Optional[str]:
-        action = self.brain.find_action(self.turn_number)
+        action = self.brain.find_action()
         self.submit_action(action)
         return action.action_type
 

@@ -30,10 +30,10 @@ class Brain:
         self.memory: List[Thought] = []
 
     # Main Action loop
-    def find_action(self, turn):
+    def find_action(self):
         self.update_state()
         actions = self.find_potential_actions()
-        thoughts = self.get_thoughts(turn)
+        thoughts = self.get_thoughts(self.game.turn_number)
         thoughts.actions = actions
         return self.choose_action(actions)
 
@@ -163,9 +163,8 @@ class Brain:
         self.clue_receiver.receive_clue(data=data)
         self.update_state()
 
-    def update_state(self, turn: Optional[Union[int, str]] = None):
+    def update_state(self):
         self.good_touch_elimination()
         self.visible_cards_elimination()
         self.update_playability()
-        if turn is not None:
-            self.get_thoughts(turn).hand = self.player.hand
+        self.get_thoughts(self.game.turn_number).hand = self.player.hand

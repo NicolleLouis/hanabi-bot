@@ -14,11 +14,25 @@ class Thought:
 
     def pretty_print(self):
         print(f"Turn: {self.turn}")
-        if self.actions is not None:
-            print("Action: ")
-            for action in self.actions:
-                print(action)
-        if self.hand is not None:
-            print("Hand: ")
-            for card in self.hand:
-                card.pretty_print()
+        self.pretty_print_actions()
+        self.pretty_print_hand()
+
+    def pretty_print_actions(self):
+        if self.actions is None:
+            return
+        print("Action: ")
+        for action in self.actions:
+            print(action)
+
+    def pretty_print_hand(self):
+        if self.hand is None:
+            return
+        print("Hand: ")
+        for index in range(len(self.hand)):
+            card = self.hand[-(index + 1)]
+            if card.is_known:
+                print(f"Slot {index}: Known Card: {card.rank} of {card.suit}")
+            elif card.touched:
+                print(f"Slot {index}: Touched Card with {len(card.computed_info.possible_cards)} possibilities")
+                if len(card.computed_info.possible_cards) < 5:
+                    card.computed_info.display_possibilities()

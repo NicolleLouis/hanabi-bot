@@ -45,7 +45,6 @@ class ClueReceiver:
             card.set_known(suit=clue.value, rank=playable_rank)
         else:
             playable_suits = self.game.board.get_playable_suits(clue.value)
-            print(playable_suits)
             if len(playable_suits) == 0:
                 print("Did not understand this play clue")
                 return

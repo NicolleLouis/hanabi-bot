@@ -1,6 +1,7 @@
 from typing import Optional
 
 from constants.action_source import ActionSource
+from services.action import ActionService
 
 
 class Action:
@@ -19,4 +20,5 @@ class Action:
         self.score = score
 
     def __str__(self):
-        return f"{self.source} -> {self.target} : {self.value} (Score: {self.score})"
+        action_type = ActionService.translate_action(self.action_type)
+        return f"{action_type} -> {self.target} : {self.value} (Score: {self.score})"
