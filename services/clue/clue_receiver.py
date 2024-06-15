@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from models.card.physical_card import PhysicalCard
 from models.clue import Clue
+from models.card.card import Card
+from services.card import CardService
 
 if TYPE_CHECKING:
     from models.game import Game
-    from models.card.card import Card
     from models.player import Player
 
 
@@ -30,10 +31,10 @@ class ClueReceiver:
 
     def analyse_clue(self, clue: Clue, focus: Card) -> None:
         chop = self.get_player(clue).get_chop()
-        if focus != chop:
-            self.compute_possible_play_cards(focus, clue)
         if focus == chop:
             self.compute_possible_save_cards(focus, clue)
+        else:
+            self.compute_possible_play_cards(focus, clue)
 
     def compute_possible_play_cards(self, card: Card, clue: Clue):
         if clue.is_color_clue:
@@ -55,9 +56,70 @@ class ClueReceiver:
                 card.set_among_possibilities(possibilities)
         card.computed_info.playable = True
 
-    # ToDo add me
     def compute_possible_save_cards(self, card, clue):
-        pass
+        if self.is_legal_save_clue(clue):
+            possible_save_cards = CardService.convert_to_physical_cards(
+                self.get_possible_save_cards(clue)
+            )
+            if len(possible_save_cards) == 0:
+                print("Did not understand this save clue")
+                return
+            if len(possible_save_cards) == 1:
+                save_card = possible_save_cards[0]
+                card.set_known(suit=save_card.suit, rank=save_card.rank)
+            else:
+                card.set_among_possibilities(possible_save_cards)
+        else:
+            # It was actually a play clue
+            self.compute_possible_play_cards(card, clue)
+
+    def get_possible_save_cards(self, clue: Clue) -> List[Union[Card, PhysicalCard]]:
+        if clue.is_color_clue:
+            save_cards = [card for card in self.game.discard_pile if card.physical_card.suit == clue.value]
+            save_cards = [card for card in save_cards if card.physical_card.rank != 5]
+            return save_cards
+        else:
+            if clue.value == 5:
+                return [card for card in self.game.deck.cards if card.rank == 5]
+            elif clue.value == 2:
+                return [card for card in self.game.deck.cards if card.rank == 2]
+            else:
+                return [card for card in self.game.discard_pile if card.physical_card.rank == clue.value]
+
+    def is_legal_save_color_clue(self, clue: Clue) -> bool:
+        played_cards = self.game.board.get_played_cards()
+        potential_saved_cards = [card for card in self.game.discard_pile if card.physical_card.suit == clue.value]
+        # Remove 1s
+        potential_saved_cards = [card for card in potential_saved_cards if card.physical_card.rank != 1]
+        for card in potential_saved_cards:
+            if card not in played_cards:
+                return True
+        return False
+
+    def is_legal_save_rank_clue(self, clue: Clue) -> bool:
+        played_cards = self.game.board.get_played_cards()
+        if clue.value == 5:
+            return True
+        elif clue.value == 1:
+            return False
+        # Legal if at least one 2 is not played
+        elif clue.value == 2:
+            for stack in self.game.board.stacks:
+                if stack.current_rank < 2:
+                    return True
+        else:
+            # For 3 and 4, it's legal if there is at least one of them in discard and not played
+            potential_saved_cards = [card for card in self.game.discard_pile if card.physical_card.rank == clue.value]
+            for card in potential_saved_cards:
+                if card not in played_cards:
+                    return True
+        return False
+
+    def is_legal_save_clue(self, clue: Clue) -> bool:
+        if clue.is_color_clue:
+            return self.is_legal_save_color_clue(clue)
+        else:
+            return self.is_legal_save_rank_clue(clue)
 
     def get_player(self, clue) -> Player:
         return self.game.player_finder.get_player(clue.player_index)

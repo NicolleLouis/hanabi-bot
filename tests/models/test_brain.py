@@ -58,7 +58,7 @@ def test_guess_trash_good_touch_elimination(brain):
 
 
 def test_no_good_touch_elimination_on_untouched_card(brain):
-    brain.player.add_card_to_hand(0, 1, 0, deck=brain.game.deck)
+    brain.player.add_card_to_hand(0, -1, -1, deck=brain.game.deck)
     unplayable_card = brain.player.get_card(0)
 
     for suit in range(1, 5):
@@ -149,20 +149,14 @@ def test_remaining_cards(brain):
 def test_visible_card_elimination(brain):
     brain.player.add_card_to_hand(0, -1, -1, deck=brain.game.deck)
     card = brain.player.get_card(0)
-    clue = Clue(
-        player_index=brain.player.index,
-        is_color_clue=True,
-        value=0,
-        card_orders_touched=[0]
-    )
-    brain.clue_receiver.receive_clue(clue=clue)
-    assert card.computed_info.possible_cards == {
+    card.computed_info.possible_cards = {
         PhysicalCard(rank=1, suit=0),
         PhysicalCard(rank=2, suit=0),
         PhysicalCard(rank=3, suit=0),
         PhysicalCard(rank=4, suit=0),
         PhysicalCard(rank=5, suit=0)
     }
+    card.computed_info.touched = True
 
     brain.game.board.add_card(PhysicalCard(rank=1, suit=0))
     brain.game.board.add_card(PhysicalCard(rank=2, suit=0))

@@ -4,7 +4,7 @@ from models.card.computed_info import ComputedInfo
 from models.card.known_info import KnownInfo
 from models.card.physical_card import PhysicalCard
 
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, Union
 
 if TYPE_CHECKING:
     from models.board import Board
@@ -32,10 +32,11 @@ class Card:
         return f"{self.rank} of {self.suit}"
 
     def pretty_print(self) -> None:
-        print("Card:")
-        print(self)
-        print(f"Order: {self.order}")
-        self.known_info.pretty_print()
+        if self.is_known:
+            print(f"Known Card: {self.rank} of {self.suit}")
+            return
+
+        print("Unknown Card: ")
         self.computed_info.pretty_print()
 
     @property
@@ -66,9 +67,18 @@ class Card:
     def set_playable(self, playable: bool) -> None:
         self.computed_info.playable = playable
 
+    def set_trash(self, trash: bool) -> None:
+        self.computed_info.trash = trash
+
     @property
     def trash(self):
         return self.computed_info.trash
+
+    def compute_is_known(self):
+        if self.rank == -1 or self.suit == -1:
+            self.is_known = False
+        else:
+            self.is_known = True
 
     def set_known(self, suit: int, rank: int):
         self.is_known = True
@@ -76,11 +86,15 @@ class Card:
         self.set_suit(suit)
 
     def update_playability(self, board: Board):
+        self.compute_is_known()
         if self.is_known:
             if board.is_card_valid(self.physical_card):
                 self.set_playable(True)
+                self.set_trash(False)
             else:
                 self.set_playable(False)
+                if board.is_already_played(self.physical_card):
+                    self.set_trash(True)
             return
         self.computed_info.update_playability(board)
 

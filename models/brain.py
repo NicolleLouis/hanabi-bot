@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from collections import Counter
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, Union
 
 from constants.action_source import ActionSource
 from models.action import Action
@@ -33,20 +33,23 @@ class Brain:
     def find_action(self, turn):
         self.update_state()
         actions = self.find_potential_actions()
-        self.memory.append(
-            Thought(
-                turn=turn,
-                actions=actions
-            )
-        )
+        thoughts = self.get_thoughts(turn)
+        thoughts.actions = actions
         return self.choose_action(actions)
 
-    def display_thoughts(self, turn):
+    def get_thoughts(self, turn: Union[int, str]) -> Thought:
+        if isinstance(turn, str):
+            turn = int(turn)
         for thought in self.memory:
             if thought.turn == turn:
-                thought.pretty_print()
-                return
-        print("No thoughts found for turn", turn)
+                return thought
+        thought = Thought(turn=turn)
+        self.memory.append(thought)
+        return thought
+
+    def display_thoughts(self, turn):
+        thoughts = self.get_thoughts(turn)
+        thoughts.pretty_print()
 
     def find_potential_actions(self) -> List[Action]:
         potential_actions = []
@@ -160,7 +163,9 @@ class Brain:
         self.clue_receiver.receive_clue(data=data)
         self.update_state()
 
-    def update_state(self):
+    def update_state(self, turn: Optional[Union[int, str]] = None):
         self.good_touch_elimination()
         self.visible_cards_elimination()
         self.update_playability()
+        if turn is not None:
+            self.get_thoughts(turn).hand = self.player.hand
