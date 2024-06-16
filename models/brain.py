@@ -14,6 +14,7 @@ from services.discard import DiscardService
 from services.play import PlayService
 
 if TYPE_CHECKING:
+    from models.clue import Clue
     from models.card.physical_card import PhysicalCard
     from models.game import Game
     from models.player import Player
@@ -33,23 +34,26 @@ class Brain:
     def find_action(self):
         self.update_state()
         actions = self.find_potential_actions()
-        thoughts = self.get_thoughts(self.game.turn_number)
-        thoughts.actions = actions
+        thought = self.get_thought(self.game.turn_number)
+        thought.actions = actions
         return self.choose_action(actions)
 
-    def get_thoughts(self, turn: Union[int, str]) -> Thought:
+    def get_thought(self, turn: Union[int, str]) -> Thought:
         if isinstance(turn, str):
             turn = int(turn)
         for thought in self.memory:
             if thought.turn == turn:
                 return thought
+        self.create_thought(turn)
+        return self.get_thought(turn)
+
+    def create_thought(self, turn: int) -> None:
         thought = Thought(turn=turn)
         self.memory.append(thought)
-        return thought
 
-    def display_thoughts(self, turn):
-        thoughts = self.get_thoughts(turn)
-        thoughts.pretty_print()
+    def display_thought(self, turn):
+        thought = self.get_thought(turn)
+        thought.pretty_print()
 
     def find_potential_actions(self) -> List[Action]:
         potential_actions = []
@@ -167,12 +171,15 @@ class Brain:
         for card in self.player.hand:
             card.update_playability(self.game.board)
 
-    def receive_clue(self, data):
-        self.clue_receiver.receive_clue(data=data)
+    def receive_clue(self, data: Optional[dict] = None, clue: Optional[Clue] = None):
+        self.clue_receiver.receive_clue(
+            data=data,
+            clue=clue
+        )
         self.update_state()
 
     def update_state(self):
         self.good_touch_elimination()
         self.visible_cards_elimination()
         self.update_playability()
-        self.get_thoughts(self.game.turn_number).set_hand(self.player.hand)
+        self.get_thought(self.game.turn_number).set_hand(self.player.hand)

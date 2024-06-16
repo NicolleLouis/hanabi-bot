@@ -38,18 +38,18 @@ class ChatService:
         command_arguments = cleaned_message.split(" ", 1)
         return command_arguments
 
-    def display_thoughts(self, sender: str, command_arguments: List[str]) -> None:
+    def display_thought(self, sender: str, command_arguments: List[str]) -> None:
         game = self.client.get_game_by_player(sender)
         turn = int(command_arguments[1])
         print("Displaying thoughts")
-        game.brain.display_thoughts(turn)
+        game.brain.display_thought(turn)
 
     def find_reaction(self, command_arguments) -> Callable[[str, List[str]], None]:
         command = command_arguments[0]
         if command == "join":
             return self.client.join_table
         if command == "thoughts":
-            return self.display_thoughts
+            return self.display_thought
         else:
             return self.send_unrecognized_command_message
 

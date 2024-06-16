@@ -29,7 +29,12 @@ class Card:
         self.computed_info = ComputedInfo(deck=deck)
 
     def __str__(self):
-        return f"{self.rank} of {self.suit}"
+        result = f"{self.rank} of {self.suit}"
+        if self.is_known:
+            result = f"Known Card: {result}"
+        if self.touched:
+            result += " (Touched)"
+        return result
 
     def pretty_print(self) -> None:
         if self.is_known:

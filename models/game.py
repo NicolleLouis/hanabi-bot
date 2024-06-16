@@ -155,6 +155,7 @@ class Game:
     def turn(self, data):
         self.turn_number = data["num"]
         self.current_player_index = data["currentPlayerIndex"]
+        self.brain.display_thought(self.turn_number - 1)
 
     def submit_action(self, action: Action):
         sleep(1)
