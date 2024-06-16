@@ -16,40 +16,40 @@ def test_card_str():
     assert str(card) == "0 of 0"
 
 
-def test_update_playability_case_unknown_yet():
+def test_update_playability_case_unknown_yet(game):
     with patch.object(ComputedInfo, 'update_playability') as mock_update_playability:
         card = Card(
             order=0,
             suit=0,
             rank=1,
         )
-        board = Board([0])
+        board = Board(game, [0])
         card.update_playability(board)
         assert card.is_known
         mock_update_playability.assert_not_called()
 
 
-def test_update_playability_case_unknown():
+def test_update_playability_case_unknown(game):
     with patch.object(ComputedInfo, 'update_playability') as mock_update_playability:
         card = Card(
             order=0,
             suit=-1,
             rank=1,
         )
-        board = Board([0])
+        board = Board(game, [0])
         card.update_playability(board)
         assert not card.is_known
         mock_update_playability.assert_called_once()
 
 
-def test_update_playability_case_known():
+def test_update_playability_case_known(game):
     with patch.object(ComputedInfo, 'update_playability') as mock_update_playability:
         card = Card(
             order=0,
             suit=0,
             rank=1,
         )
-        board = Board([0])
+        board = Board(game, [0])
         card.set_known(0, 1)
         card.update_playability(board)
         mock_update_playability.assert_not_called()

@@ -277,8 +277,8 @@ def test_compute_possible_save_cards_case_multiple_option(
 
 
 def test_get_possible_save_cards_case_color(game):
-    game.discard_pile.append(Card(0, 0, 3, game.deck))
-    game.discard_pile.append(Card(1, 0, 5, game.deck))
+    game.board.discard_pile.append(Card(0, 0, 3, game.deck))
+    game.board.discard_pile.append(Card(1, 0, 5, game.deck))
     clue_receiver = ClueReceiver(game)
     clue = Clue(
         player_index=0,
@@ -329,8 +329,8 @@ def test_get_possible_save_cards_case_rank_2(game):
 
 
 def test_get_possible_save_cards_case_rank_3_or_4(game):
-    game.discard_pile.append(Card(0, 0, 3, game.deck))
-    game.discard_pile.append(Card(1, 0, 4, game.deck))
+    game.board.discard_pile.append(Card(0, 0, 3, game.deck))
+    game.board.discard_pile.append(Card(1, 0, 4, game.deck))
     clue_receiver = ClueReceiver(game)
     clue = Clue(
         player_index=0,
@@ -354,10 +354,10 @@ def test_is_legal_save_color_clue(game):
     )
     assert not clue_receiver.is_legal_save_color_clue(clue)
 
-    game.discard_pile.append(Card(1, 0, 1, game.deck))
+    game.board.discard_pile.append(Card(1, 0, 1, game.deck))
     assert not clue_receiver.is_legal_save_color_clue(clue)
 
-    game.discard_pile.append(Card(2, 0, 3, game.deck))
+    game.board.discard_pile.append(Card(2, 0, 3, game.deck))
     assert clue_receiver.is_legal_save_color_clue(clue)
 
     game.board.add_card(PhysicalCard(0, 1))
@@ -415,7 +415,7 @@ def test_is_legal_save_rank_clue_case_3_or_4(game):
     )
     assert not clue_receiver.is_legal_save_rank_clue(clue)
 
-    game.discard_pile.append(Card(1, 0, 3, game.deck))
+    game.board.discard_pile.append(Card(1, 0, 3, game.deck))
     assert clue_receiver.is_legal_save_rank_clue(clue)
 
     game.board.add_card(PhysicalCard(0, 1))

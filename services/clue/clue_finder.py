@@ -37,14 +37,38 @@ class ClueFinder:
                 play_clues.append(self.generate_clue(card, is_color_clue=True))
             if self.is_card_rank_focusable(card):
                 play_clues.append(self.generate_clue(card, is_color_clue=False))
-        valid_play_clues = self.filter_valid_clues(play_clues)
-        scored_play_clues = self.score_clues(valid_play_clues)
+        valid_play_clues = self.filter_valid_play_clues(play_clues)
+        valid_clues = self.filter_valid_clues(valid_play_clues)
+        scored_play_clues = self.score_clues(valid_clues)
         return scored_play_clues
+
+    def find_save_clues(self) -> List[Clue]:
+        savable_cards = self.savable_cards()
+
+        save_clues = []
+        for card in savable_cards:
+            save_clues.append(self.generate_clue(card, is_color_clue=True))
+            save_clues.append(self.generate_clue(card, is_color_clue=False))
+        valid_save_clues = self.filter_valid_save_clues(save_clues)
+        valid_clues = self.filter_valid_clues(valid_save_clues)
+        scored_save_clues = self.score_clues(valid_clues)
+        return scored_save_clues
 
     def score_clues(self, clues: List[Clue]) -> List[Clue]:
         for clue in clues:
             clue.score = self.clue_score(clue)
         return clues
+
+    def filter_valid_save_clues(self, clues: List[Clue]) -> List[Clue]:
+        valid_save_clues = []
+        for clue in clues:
+            card_saved = self.get_focus_clue(clue)
+            if card_saved.rank == 5 and clue.is_color_clue:
+                continue
+            if card_saved.rank == 2 and clue.is_color_clue and not self.game.board.is_critical(card_saved):
+                continue
+            valid_save_clues.append(clue)
+        return valid_save_clues
 
     def filter_valid_clues(self, clues: List[Clue]) -> List[Clue]:
         validation_function = [
@@ -57,12 +81,34 @@ class ClueFinder:
             filtered_clues = [clue for clue in filtered_clues if function(clue)]
         return filtered_clues
 
+    def filter_valid_play_clues(self, clues: List[Clue]) -> List[Clue]:
+        valid_play_clues = []
+        clue_receiver = ClueReceiver(self.game)
+        for clue in clues:
+            if not clue_receiver.is_legal_save_clue(clue):
+                valid_play_clues.append(clue)
+        return valid_play_clues
+
     def filter_touchable_cards(self, cards: List[Card]):
         touchable_cards = []
         for card in cards:
             if self.is_card_color_focusable(card) or self.is_card_rank_focusable(card):
                 touchable_cards.append(card)
         return touchable_cards
+
+    # Fetch only chop cards
+    def savable_cards(self) -> List[Card]:
+        savable_cards = []
+        for player in self.other_players():
+            card = player.get_chop()
+            if card is None:
+                continue
+            if self.game.board.is_critical(card.physical_card):
+                savable_cards.append(card)
+                continue
+            if card.rank == 2 and not self.game.board.is_already_played(card.physical_card):
+                savable_cards.append(card)
+        return savable_cards
 
     def playable_cards(self) -> List[Card]:
         playable_cards = []
@@ -84,19 +130,22 @@ class ClueFinder:
             card=card
         )
 
+    def get_focus_clue(self, clue: Clue) -> Card:
+        return ClueReceiver(self.game).find_focus(clue)
+
     def is_card_color_focusable(self, card: Card) -> bool:
         color_clue = self.generate_clue(
             card=card,
             is_color_clue=True
         )
-        return ClueReceiver(self.game).find_focus(color_clue) == card
+        return self.get_focus_clue(color_clue) == card
 
     def is_card_rank_focusable(self, card: Card) -> bool:
         rank_clue = self.generate_clue(
             card=card,
             is_color_clue=False
         )
-        return ClueReceiver(self.game).find_focus(rank_clue) == card
+        return self.get_focus_clue(rank_clue) == card
 
     def clue_follow_good_touch(self, clue: Clue) -> bool:
         newly_touched_cards = self.newly_touched_cards(clue)

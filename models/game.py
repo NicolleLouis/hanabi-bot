@@ -38,7 +38,6 @@ class Game:
         # Game state
         self.turn_number = -1
         self.current_player_index = -1
-        self.discard_pile = []
         self.clue_tokens = 8
 
         # Services
@@ -54,8 +53,8 @@ class Game:
         self.table_id = data["tableID"]
 
         self.suits = [0, 1, 2, 3, 4]
-        self.board = Board(self.suits)
         self.deck = Deck(self.suits)
+        self.board = Board(self, self.suits)
 
         self.brain.set_player(self.player_finder.find_self())
 
@@ -144,7 +143,7 @@ class Game:
         player = self.get_player(data["playerIndex"])
         order = data["order"]
         card = player.remove_card_from_hand(order)
-        self.discard_pile.append(card)
+        self.board.discard_pile.append(card)
 
         if not data["failed"]:
             self.clue_tokens += 1

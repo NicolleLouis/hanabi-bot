@@ -21,4 +21,4 @@ class Action:
 
     def __str__(self):
         action_type = ActionService.translate_action(self.action_type)
-        return f"{action_type} -> {self.target} : {self.value} (Score: {self.score})"
+        return f"{action_type} ({self.source}) -> {self.target} : {self.value} (Score: {self.score})"

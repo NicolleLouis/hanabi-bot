@@ -93,8 +93,8 @@ def test_positive_rank_clues():
     assert (PhysicalCard(5, 1)) in card.computed_info.possible_cards
 
 
-def test_update_playability():
-    board = Board([1, 2])
+def test_update_playability(game):
+    board = Board(game, [1, 2])
     card = Card(0, -1, -1)
     card.computed_info.possible_cards = {PhysicalCard(1, 1), PhysicalCard(2, 2)}
 

@@ -74,7 +74,7 @@ class ClueReceiver:
 
     def get_possible_save_cards(self, clue: Clue) -> List[Union[Card, PhysicalCard]]:
         if clue.is_color_clue:
-            save_cards = [card for card in self.game.discard_pile if card.physical_card.suit == clue.value]
+            save_cards = [card for card in self.game.board.discard_pile if card.physical_card.suit == clue.value]
             save_cards = [card for card in save_cards if card.physical_card.rank != 5]
             return save_cards
         else:
@@ -83,11 +83,11 @@ class ClueReceiver:
             elif clue.value == 2:
                 return [card for card in self.game.deck.cards if card.rank == 2]
             else:
-                return [card for card in self.game.discard_pile if card.physical_card.rank == clue.value]
+                return [card for card in self.game.board.discard_pile if card.physical_card.rank == clue.value]
 
     def is_legal_save_color_clue(self, clue: Clue) -> bool:
         played_cards = self.game.board.get_played_cards()
-        potential_saved_cards = [card for card in self.game.discard_pile if card.physical_card.suit == clue.value]
+        potential_saved_cards = [card for card in self.game.board.discard_pile if card.physical_card.suit == clue.value]
         # Remove 1s
         potential_saved_cards = [card for card in potential_saved_cards if card.physical_card.rank != 1]
         for card in potential_saved_cards:
@@ -108,7 +108,7 @@ class ClueReceiver:
                     return True
         else:
             # For 3 and 4, it's legal if there is at least one of them in discard and not played
-            potential_saved_cards = [card for card in self.game.discard_pile if card.physical_card.rank == clue.value]
+            potential_saved_cards = [card for card in self.game.board.discard_pile if card.physical_card.rank == clue.value]
             for card in potential_saved_cards:
                 if card not in played_cards:
                     return True

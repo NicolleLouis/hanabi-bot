@@ -123,7 +123,7 @@ def test_visible_cards(brain):
     assert len(brain.visible_cards()) == 2
     assert PhysicalCard(rank=1, suit=2) in brain.visible_cards()
 
-    brain.game.discard_pile.append(PhysicalCard(rank=1, suit=3))
+    brain.game.board.discard_pile.append(PhysicalCard(rank=1, suit=3))
     assert len(brain.visible_cards()) == 3
     assert PhysicalCard(rank=1, suit=3) in brain.visible_cards()
 
@@ -141,7 +141,7 @@ def test_remaining_cards(brain):
     next_player.add_card_to_hand(1, 1, 1, deck=brain.game.deck)
     assert len(brain.remaining_cards()) == 48
 
-    brain.game.discard_pile.append(PhysicalCard(rank=1, suit=1))
+    brain.game.board.discard_pile.append(PhysicalCard(rank=1, suit=1))
     assert len(brain.remaining_cards()) == 47
     assert PhysicalCard(rank=1, suit=1) not in brain.remaining_cards()
 

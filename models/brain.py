@@ -56,6 +56,7 @@ class Brain:
         potential_actions.extend(self.find_play_actions())
         potential_actions.extend(self.find_discard_actions())
         potential_actions.extend(self.find_play_clues())
+        potential_actions.extend(self.find_save_clues())
         return potential_actions
 
     def find_play_actions(self) -> List[Action]:
@@ -77,6 +78,13 @@ class Brain:
         for clue in play_clues:
             play_clue_actions.append(clue.to_action(ActionSource.PLAY_CLUE))
         return play_clue_actions
+
+    def find_save_clues(self) -> List[Action]:
+        save_clues = self.clue_finder.find_save_clues()
+        save_clue_actions = []
+        for clue in save_clues:
+            save_clue_actions.append(clue.to_action(ActionSource.SAVE_CLUE))
+        return save_clue_actions
 
     def choose_action(self, actions: List[Action]) -> Action:
         if self.game.clue_tokens == 0:
@@ -130,7 +138,7 @@ class Brain:
                     card.computed_info.remove_possibility(played_card)
 
     def visible_cards(self):
-        visible_cards = self.game.discard_pile + self.game.board.get_played_cards()
+        visible_cards = self.game.board.discard_pile + self.game.board.get_played_cards()
         for player in self.game.players:
             if player != self.player:
                 visible_cards.extend(player.hand)

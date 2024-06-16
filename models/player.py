@@ -50,10 +50,14 @@ class Player:
     def has_card(self, card):
         return len([c for c in self.hand if c.order == card.order]) > 0
 
-    def get_finesse(self) -> Card:
+    def get_finesse(self) -> Optional[Card]:
+        if len(self.unclued_cards) == 0:
+            return None
         return self.unclued_cards[-1]
 
-    def get_chop(self) -> Card:
+    def get_chop(self) -> Optional[Card]:
+        if len(self.unclued_cards) == 0:
+            return None
         return self.unclued_cards[0]
 
     def remove_card_from_hand(self, card_order) -> Card:
