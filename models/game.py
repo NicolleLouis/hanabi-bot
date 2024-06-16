@@ -102,6 +102,7 @@ class Game:
     def status(self, data):
         if data["clues"] != self.clue_tokens:
             print(data)
+            print(f"Currently thought clues: {self.clue_tokens}")
             raise GameException("Clue tokens mismatch")
 
     def update_state(self, data):

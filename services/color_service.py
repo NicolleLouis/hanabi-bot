@@ -1,10 +1,10 @@
 class ColorService:
     COLOR_TRANSLATION = {
-        0: "red",
-        1: "yellow",
-        2: "green",
-        3: "blue",
-        4: "purple"
+        0: "Red",
+        1: "Yellow",
+        2: "Green",
+        3: "Blue",
+        4: "Purple"
     }
 
     @classmethod

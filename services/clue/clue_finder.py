@@ -149,7 +149,7 @@ class ClueFinder:
 
     def clue_follow_good_touch(self, clue: Clue) -> bool:
         newly_touched_cards = self.newly_touched_cards(clue)
-        known_cards = self.brain.get_known_cards()
+        known_cards = self.brain.get_cards_gotten()
         for card in newly_touched_cards:
             if card.physical_card in known_cards:
                 return False

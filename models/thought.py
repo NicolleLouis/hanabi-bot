@@ -12,6 +12,12 @@ class Thought:
         self.turn = turn
         self.actions = actions
         self.hand = None
+        self.touched_player_hand = None
+        self.touched_player_name = None
+
+    def set_touched_player(self, player):
+        self.touched_player_hand = copy.deepcopy(player.hand)
+        self.touched_player_name = player.name
 
     def set_hand(self, hand):
         self.hand = copy.deepcopy(hand)
@@ -19,7 +25,10 @@ class Thought:
     def pretty_print(self):
         print(f"Turn: {self.turn}")
         self.pretty_print_actions()
-        self.pretty_print_hand()
+        print("Player Hand: ")
+        self.pretty_print_hand(self.hand)
+        print(f"{self.touched_player_name} Hand: ")
+        self.pretty_print_hand(self.touched_player_hand)
 
     def pretty_print_actions(self):
         if self.actions is None:
@@ -28,12 +37,14 @@ class Thought:
         for action in self.actions:
             print(action)
 
-    def pretty_print_hand(self):
-        if self.hand is None:
+    def pretty_print_hand(self, hand=None):
+        if hand is None:
+            hand = self.hand
+
+        if hand is None:
             return
-        print("Hand: ")
-        for index in range(len(self.hand)):
-            card = self.hand[-(index + 1)]
+        for index in range(len(hand)):
+            card = hand[-(index + 1)]
             if card.is_known:
                 print(f"Slot {index + 1}: Known Card: {card.rank} of {card.suit}")
             elif card.touched:

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 
 if TYPE_CHECKING:
-    from models.card.card import Card
     from models.board import Board
     from models.card.physical_card import PhysicalCard
     from models.card.known_info import KnownInfo

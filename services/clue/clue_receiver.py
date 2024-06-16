@@ -20,11 +20,7 @@ class ClueReceiver:
     def __init__(self, game: Game):
         self.game = game
 
-    def receive_clue(self, data: Optional[dict] = None, clue: Optional[Clue] = None) -> None:
-        if clue is None:
-            if data is None:
-                raise ClueReceiverException("No clue or data provided")
-            clue = Clue(data)
+    def receive_clue(self, clue: Clue) -> None:
         focus = self.find_focus(clue)
         self.analyse_clue(clue, focus)
         self.save_clue_information(clue)

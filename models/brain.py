@@ -12,9 +12,9 @@ from services.clue.clue_finder import ClueFinder
 from services.clue.clue_receiver import ClueReceiver
 from services.discard import DiscardService
 from services.play import PlayService
+from models.clue import Clue
 
 if TYPE_CHECKING:
-    from models.clue import Clue
     from models.card.physical_card import PhysicalCard
     from models.game import Game
     from models.player import Player
@@ -38,7 +38,9 @@ class Brain:
         thought.actions = actions
         return self.choose_action(actions)
 
-    def get_thought(self, turn: Union[int, str]) -> Thought:
+    def get_thought(self, turn: Optional[Union[int, str]] = None) -> Thought:
+        if turn is None:
+            turn = self.game.turn_number
         if isinstance(turn, str):
             turn = int(turn)
         for thought in self.memory:
@@ -46,6 +48,9 @@ class Brain:
                 return thought
         self.create_thought(turn)
         return self.get_thought(turn)
+
+    def other_players(self):
+        return [player for player in self.game.players if player != self.player]
 
     def create_thought(self, turn: int) -> None:
         thought = Thought(turn=turn)
@@ -127,19 +132,19 @@ class Brain:
             card.computed_info.pretty_print()
 
     # Beware touched cards by ourselves (Might be duplicated)
-    def get_known_cards(self) -> List[PhysicalCard]:
+    def get_cards_gotten(self) -> List[PhysicalCard]:
         played_cards = self.game.board.get_played_cards()
         touched_cards = []
-        for player in self.game.players:
+        for player in self.other_players():
             touched_cards.extend([card.physical_card for card in player.touched_cards])
         return played_cards + touched_cards
 
     def good_touch_elimination(self):
-        played_cards = self.get_known_cards()
+        cards_gotten = self.get_cards_gotten()
         for card in self.player.touched_cards:
-            for played_card in played_cards:
-                if card.physical_card != played_card:
-                    card.computed_info.remove_possibility(played_card)
+            for card_gotten in cards_gotten:
+                if card.physical_card != card_gotten:
+                    card.computed_info.remove_possibility(card_gotten)
 
     def visible_cards(self):
         visible_cards = self.game.board.discard_pile + self.game.board.get_played_cards()
@@ -172,11 +177,15 @@ class Brain:
             card.update_playability(self.game.board)
 
     def receive_clue(self, data: Optional[dict] = None, clue: Optional[Clue] = None):
+        if clue is None:
+            clue = Clue(data)
         self.clue_receiver.receive_clue(
-            data=data,
             clue=clue
         )
         self.update_state()
+        thought = self.get_thought()
+        target_player = self.player_finder.get_player(clue.player_index)
+        thought.set_touched_player(target_player)
 
     def update_state(self):
         self.good_touch_elimination()

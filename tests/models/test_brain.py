@@ -85,24 +85,23 @@ def test_no_good_touch_elimination_on_untouched_card(brain):
     assert len(unplayable_card.computed_info.possible_cards) == 5
 
 
-# ToDo Random fails here
-def test_get_known_cards(brain):
-    assert brain.get_known_cards() == []
+def test_get_cards_gotten(brain):
+    assert brain.get_cards_gotten() == []
 
     brain.game.board.add_card(PhysicalCard(rank=1, suit=0))
-    assert brain.get_known_cards() == [PhysicalCard(rank=1, suit=0)]
+    assert brain.get_cards_gotten() == [PhysicalCard(rank=1, suit=0)]
 
-    brain.player.add_card_to_hand(0, 1, 1, deck=brain.game.deck)
-    brain.player.get_card(0).computed_info.touched = True
-    assert brain.get_known_cards() == [
+    next_player = brain.player_finder.next_seated_player()
+    next_player.add_card_to_hand(0, 1, 1, deck=brain.game.deck)
+    next_player.get_card(0).computed_info.touched = True
+    assert brain.get_cards_gotten() == [
         PhysicalCard(rank=1, suit=0),
         PhysicalCard(rank=1, suit=1)
     ]
 
-    next_player = brain.player_finder.next_seated_player()
     next_player.add_card_to_hand(1, 1, 2, deck=brain.game.deck)
     next_player.get_card(1).computed_info.touched = True
-    assert brain.get_known_cards() == [
+    assert brain.get_cards_gotten() == [
         PhysicalCard(rank=1, suit=0),
         PhysicalCard(rank=1, suit=1),
         PhysicalCard(rank=1, suit=2),
