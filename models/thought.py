@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from typing import List, TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -11,6 +12,9 @@ class Thought:
         self.turn = turn
         self.actions = actions
         self.hand = None
+
+    def set_hand(self, hand):
+        self.hand = copy.deepcopy(hand)
 
     def pretty_print(self):
         print(f"Turn: {self.turn}")
@@ -31,8 +35,8 @@ class Thought:
         for index in range(len(self.hand)):
             card = self.hand[-(index + 1)]
             if card.is_known:
-                print(f"Slot {index}: Known Card: {card.rank} of {card.suit}")
+                print(f"Slot {index + 1}: Known Card: {card.rank} of {card.suit}")
             elif card.touched:
-                print(f"Slot {index}: Touched Card with {len(card.computed_info.possible_cards)} possibilities")
+                print(f"Slot {index + 1}: Touched Card with {len(card.computed_info.possible_cards)} possibilities")
                 if len(card.computed_info.possible_cards) < 5:
                     card.computed_info.display_possibilities()

@@ -167,4 +167,4 @@ class Brain:
         self.good_touch_elimination()
         self.visible_cards_elimination()
         self.update_playability()
-        self.get_thoughts(self.game.turn_number).hand = self.player.hand
+        self.get_thoughts(self.game.turn_number).set_hand(self.player.hand)
