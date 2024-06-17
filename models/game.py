@@ -78,7 +78,8 @@ class Game:
             return
 
         action_chosen = self.choose_action()
-        if action_chosen in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
+        if action_chosen.action_type in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
+            self.brain.receive_clue(clue=action_chosen.to_clue(self))
             self.clue_tokens -= 1
 
     def handle_action(self, data):
@@ -116,10 +117,10 @@ class Game:
         }
         action[data["type"]](data)
 
-    def choose_action(self) -> Optional[str]:
+    def choose_action(self) -> Optional[Action]:
         action = self.brain.find_action()
         self.submit_action(action)
-        return action.action_type
+        return action
 
     def draw(self, data):
         player = self.get_player(data["playerIndex"])
