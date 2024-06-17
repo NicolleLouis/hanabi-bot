@@ -35,7 +35,7 @@ class Thought:
             return
         print("Action: ")
         for action in self.actions:
-            print(action)
+            print(str(action))
 
     def pretty_print_hand(self, hand=None):
         if hand is None:
