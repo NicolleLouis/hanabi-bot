@@ -1,3 +1,5 @@
+import pytest
+
 from models.card.physical_card import PhysicalCard
 from models.clue import Clue
 
@@ -174,3 +176,23 @@ def test_visible_card_elimination(brain):
     assert card.computed_info.possible_cards == {
         PhysicalCard(rank=4, suit=0)
     }
+
+
+def test_locked_choose_action(brain):
+    brain.player.add_card_to_hand(0, 1, 1, deck=brain.game.deck)
+    brain.player.add_card_to_hand(1, 1, 2, deck=brain.game.deck)
+    brain.player.add_card_to_hand(2, 1, 3, deck=brain.game.deck)
+    brain.player.add_card_to_hand(3, 1, 4, deck=brain.game.deck)
+    clue = Clue(
+        player_index=brain.player.index,
+        is_color_clue=False,
+        value=1,
+        card_orders_touched=[0, 1, 2, 3]
+    )
+    brain.clue_receiver.receive_clue(clue=clue)
+    assert brain.player.get_chop() is None
+
+    try:
+        brain.find_action()
+    except Exception as e:
+        pytest.fail("Unexpected exception: " + str(e))

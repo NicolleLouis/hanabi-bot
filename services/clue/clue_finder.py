@@ -42,6 +42,18 @@ class ClueFinder:
         scored_play_clues = self.score_clues(valid_clues)
         return scored_play_clues
 
+    def find_stall_clues(self) -> List[Clue]:
+        touched_cards = []
+        stall_clues = []
+        for player in self.other_players():
+            touched_cards.extend(player.touched_cards)
+        for card in touched_cards:
+            stall_clues.append(self.generate_clue(card, is_color_clue=True))
+            stall_clues.append(self.generate_clue(card, is_color_clue=False))
+        valid_stall_clues = self.filter_valid_stall_clues(stall_clues)
+        scored_stall_clues = self.score_clues(valid_stall_clues)
+        return scored_stall_clues
+
     def find_save_clues(self) -> List[Clue]:
         savable_cards = self.savable_cards()
 
@@ -73,6 +85,17 @@ class ClueFinder:
     def filter_valid_clues(self, clues: List[Clue]) -> List[Clue]:
         validation_function = [
             self.clue_follow_minimum_value,
+            self.clue_follow_good_touch,
+            self.clue_should_not_duplicate_cards,
+        ]
+        filtered_clues = clues
+        for function in validation_function:
+            filtered_clues = [clue for clue in filtered_clues if function(clue)]
+        return filtered_clues
+
+    def filter_valid_stall_clues(self, clues: List[Clue]) -> List[Clue]:
+        validation_function = [
+            self.leave_board_untouched,
             self.clue_follow_good_touch,
             self.clue_should_not_duplicate_cards,
         ]
@@ -147,6 +170,9 @@ class ClueFinder:
         )
         return self.get_focus_clue(rank_clue) == card
 
+    def leave_board_untouched(self, clue: Clue) -> bool:
+        return len(self.newly_touched_cards(clue)) == 0
+
     def clue_follow_good_touch(self, clue: Clue) -> bool:
         newly_touched_cards = self.newly_touched_cards(clue)
         known_cards = self.brain.get_cards_gotten()
@@ -174,4 +200,6 @@ class ClueFinder:
     # 1 point per card newly touched
     def clue_score(self, clue: Clue) -> int:
         newly_touched_card = self.newly_touched_cards(clue)
+        if len(newly_touched_card) == 0:
+            return -1
         return len(newly_touched_card)

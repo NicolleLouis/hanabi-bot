@@ -66,20 +66,28 @@ class Brain:
         potential_actions.extend(self.find_discard_actions())
         potential_actions.extend(self.find_play_clues())
         potential_actions.extend(self.find_save_clues())
+        potential_actions.extend(self.find_stall_clues())
         return potential_actions
 
     def find_play_actions(self) -> List[Action]:
         play_actions = []
         for card in self.player.hand:
             if card.computed_info.playable:
-                play_actions.append(self.play_service.to_card(card, 1))
+                play_actions.append(self.play_service.to_card(card, 2))
         return play_actions
 
     def find_discard_actions(self) -> List[Action]:
-        discard_actions = [self.discard_service.to_chop(-1)]
+        discard_actions = [self.discard_service.to_chop(0)]
         for card in self.player.trash_cards:
-            discard_actions.append(self.discard_service.to_card(card, 0))
+            discard_actions.append(self.discard_service.to_card(card, 1))
         return discard_actions
+
+    def find_stall_clues(self) -> List[Action]:
+        stall_clues = self.clue_finder.find_stall_clues()
+        stall_clue_actions = []
+        for clue in stall_clues:
+            stall_clue_actions.append(clue.to_action(ActionSource.STALL_CLUE))
+        return stall_clue_actions
 
     def find_play_clues(self) -> List[Action]:
         play_clues = self.clue_finder.find_play_clues()
@@ -96,12 +104,19 @@ class Brain:
         return save_clue_actions
 
     def choose_action(self, actions: List[Action]) -> Action:
+        actions = [action for action in actions if action is not None]
+        impossible_actions = []
         if self.game.clue_tokens == 0:
             impossible_actions = [
                 ActionSource.PLAY_CLUE,
-                ActionSource.SAVE_CLUE
+                ActionSource.SAVE_CLUE,
+                ActionSource.STALL_CLUE,
             ]
-            actions = [action for action in actions if action.source not in impossible_actions]
+        elif self.game.clue_tokens == 8:
+            impossible_actions = [
+                ActionSource.DISCARD,
+            ]
+        actions = [action for action in actions if action.source not in impossible_actions]
         max_score = max([action.score for action in actions])
         best_actions = [action for action in actions if action.score == max_score]
         return random.choice(best_actions)

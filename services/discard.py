@@ -31,4 +31,6 @@ class DiscardService:
         return self.build(self.player.get_card_by_slot(slot_number), score)
 
     def to_chop(self, score: Optional[int] = None):
+        if self.player.get_chop() is None:
+            return None
         return self.build(self.player.get_chop(), score)

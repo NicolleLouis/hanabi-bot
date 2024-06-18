@@ -6,3 +6,4 @@ class ActionSource(Enum):
     DISCARD = "discard"
     SAVE_CLUE = "save clue"
     PLAY = "play"
+    STALL_CLUE = "stall clue"
