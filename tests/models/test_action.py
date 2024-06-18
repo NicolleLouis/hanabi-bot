@@ -3,6 +3,7 @@ import pytest
 from constants.actions import ACTION
 from models.action import ActionException, Action
 from models.card.card import Card
+from models.clue import Clue
 
 
 def test_to_clue_case_error(game):
@@ -31,6 +32,7 @@ def test_to_clue_case_color_clue(game):
 def test_to_clue_case_rank_clue(game):
     action = Action(ACTION.RANK_CLUE, 1, value=1)
     clue = action.to_clue(game)
+    assert isinstance(clue, Clue)
     assert clue.player_index == 1
     assert clue.value == 1
     assert not clue.is_color_clue

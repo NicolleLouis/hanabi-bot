@@ -79,7 +79,7 @@ class Game:
 
         action_chosen = self.choose_action()
         if action_chosen.action_type in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
-            self.brain.receive_clue(action_chosen.to_clue(self))
+            self.brain.receive_clue(clue=action_chosen.to_clue(self))
             self.clue_tokens -= 1
 
     def handle_action(self, data):
