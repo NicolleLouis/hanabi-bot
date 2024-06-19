@@ -7,6 +7,7 @@ from constants.actions import ACTION
 from models.board import Board
 from models.brain import Brain
 from models.deck import Deck
+from models.game_logger import GameLogger
 from models.player import Player
 
 from services.player_finder import PlayerFinder
@@ -43,6 +44,7 @@ class Game:
         # Services
         self.player_finder = PlayerFinder(self)
         self.brain = Brain(self)
+        self.logger = GameLogger(self)
 
     def __str__(self):
         return f"Game: table_id={self.table_id}, turn_number={self.turn_number}"
@@ -73,6 +75,7 @@ class Game:
     def ready(self):
         self.turn_number = 0
         self.current_player_index = 0
+        self.logger.ready()
 
         if self.current_player_index != self.own_index:
             return
@@ -113,13 +116,20 @@ class Game:
             "discard": self.discard,
             "clue": self.clue,
             "turn": self.turn,
-            "status": self.status
+            "status": self.status,
+            "gameOver": self.game_over,
         }
         action[data["type"]](data)
+
+    def game_over(self, data):
+        print("Game Over")
+        print(data)
+        self.logger.save()
 
     def choose_action(self) -> Optional[Action]:
         action = self.brain.find_action()
         self.submit_action(action)
+        self.logger.action(action)
         return action
 
     def draw(self, data):
@@ -130,6 +140,7 @@ class Game:
             data["suitIndex"],
             deck=self.deck
         )
+        self.logger.draw(data)
 
     def play(self, data):
         player = self.get_player(data["playerIndex"])
@@ -140,24 +151,30 @@ class Game:
         success = self.board.add_card(card.physical_card)
         if success and card.rank == 5:
             self.clue_tokens += 1
+        self.logger.play(data)
 
     def discard(self, data):
         player = self.get_player(data["playerIndex"])
         order = data["order"]
         card = player.remove_card_from_hand(order)
+        card.set_suit(data["suitIndex"])
+        card.set_rank(data["rank"])
         self.board.discard_pile.append(card)
 
         if not data["failed"]:
             self.clue_tokens += 1
+        self.logger.discard(data)
 
     def clue(self, data):
         self.brain.receive_clue(data=data)
         self.clue_tokens -= 1
+        self.logger.clue(data)
 
     def turn(self, data):
         self.turn_number = data["num"]
         self.current_player_index = data["currentPlayerIndex"]
         self.brain.display_thought(self.turn_number - 1)
+        self.logger.turn(data)
 
     def submit_action(self, action: Action):
         sleep(1)
