@@ -1,5 +1,6 @@
 class ColorService:
     COLOR_TRANSLATION = {
+        -1: "Unknown",
         0: "Red",
         1: "Yellow",
         2: "Green",

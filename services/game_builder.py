@@ -20,6 +20,10 @@ class GameBuilder:
         while self.game.turn_number < turn_number:
             self.build_next()
 
+    def build_until_end(self) -> None:
+        while self.raw_data:
+            self.build_next()
+
     def set_next_action(self) -> None:
         if self.next_action is not None:
             return

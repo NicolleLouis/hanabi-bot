@@ -34,21 +34,28 @@ class ClueReceiver:
 
     def compute_possible_play_cards(self, card: Card, clue: Clue):
         if clue.is_color_clue:
-            playable_rank = self.game.board.get_playable_rank(clue.value)
-            if playable_rank is None:
-                print("Did not understand this play clue")
-                return
-            card.set_known(suit=clue.value, rank=playable_rank)
+            self.compute_possible_play_color_clue(card, clue)
         else:
-            playable_suits = self.game.board.get_playable_suits(clue.value)
-            if len(playable_suits) == 0:
-                print("Did not understand this play clue")
-                return
-            if len(playable_suits) == 1:
-                card.set_known(suit=playable_suits[0], rank=clue.value)
-            else:
-                possibilities = [PhysicalCard(suit=suit, rank=clue.value) for suit in playable_suits]
-                card.set_among_possibilities(possibilities)
+            self.compute_possible_play_rank_clue(card, clue)
+
+    def compute_possible_play_color_clue(self, card: Card, clue: Clue):
+        playable_rank = self.game.board.get_playable_rank(clue.value)
+        if playable_rank is None:
+            print("Did not understand this play clue")
+            return
+        card.set_known(suit=clue.value, rank=playable_rank)
+        card.computed_info.playable = True
+
+    def compute_possible_play_rank_clue(self, card: Card, clue: Clue):
+        playable_suits = self.game.board.get_playable_suits(clue.value)
+        if len(playable_suits) == 0:
+            print("Did not understand this play clue")
+            return
+        if len(playable_suits) == 1:
+            card.set_known(suit=playable_suits[0], rank=clue.value)
+        else:
+            possibilities = [PhysicalCard(suit=suit, rank=clue.value) for suit in playable_suits]
+            card.set_among_possibilities(possibilities)
         card.computed_info.playable = True
 
     def compute_possible_save_cards(self, card, clue):

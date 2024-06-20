@@ -178,7 +178,7 @@ class Game:
         self.board.discard_pile.append(card)
 
         failed = data.get('failed', False)
-        if failed:
+        if not failed:
             self.clue_tokens += 1
         self.logger.discard(data)
 
