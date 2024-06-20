@@ -6,6 +6,8 @@ from models.card.physical_card import PhysicalCard
 
 from typing import TYPE_CHECKING, Optional, List, Union
 
+from services.color_service import ColorService
+
 if TYPE_CHECKING:
     from models.board import Board
     from models.deck import Deck
@@ -29,7 +31,8 @@ class Card:
         self.computed_info = ComputedInfo(deck=deck)
 
     def __str__(self):
-        result = f"{self.rank} of {self.suit}"
+        color = ColorService.translate_suit(self.suit)
+        result = f"{color}{self.rank}"
         if self.is_known:
             result = f"Known Card: {result}"
         if self.touched:

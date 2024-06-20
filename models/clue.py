@@ -28,22 +28,42 @@ class Clue:
         )
 
         if data is not None:
-            self.player_index = data["target"]
-            self.is_color_clue = data["clue"]["type"] == 0
-            self.value = data["clue"]["value"]
-            self.card_orders_touched = data["list"]
+            self.player_index = self.get_player_index(data)
+            self.is_color_clue = self.get_is_color_clue(data)
+            self.value = self.get_value(data)
+            self.card_orders_touched = self.get_card_orders_touched(data)
             return
 
-        if player_index is not None:
-            self.player_index = player_index
-        if is_color_clue is not None:
-            self.is_color_clue = is_color_clue
-        if value is not None:
-            self.value = value
-        if card_orders_touched is not None:
-            self.card_orders_touched = card_orders_touched
+        self.player_index = player_index
+        self.is_color_clue = is_color_clue
+        self.value = value
+        self.card_orders_touched = card_orders_touched
 
         self.score = score
+
+    @staticmethod
+    def get_card_orders_touched(data):
+        if "list" in data:
+            return data["list"]
+        return data["card_orders_touched"]
+
+    @staticmethod
+    def get_player_index(data):
+        if "target" in data:
+            return data["target"]
+        return data["player_index"]
+
+    @staticmethod
+    def get_value(data):
+        if "clue" in data:
+            return data["clue"]["value"]
+        return data["value"]
+
+    @staticmethod
+    def get_is_color_clue(data):
+        if "clue" in data:
+            return data["clue"]["type"] == 0
+        return data["is_color_clue"]
 
     def __str__(self):
         return f"Clue: To:{self.player_index} - is_color:{self.is_color_clue} - value:{self.value}"

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from models.game import Game
@@ -19,17 +19,25 @@ class ActionException(Exception):
 class Action:
     def __init__(
             self,
-            action_type: str,
+            action_type: Union[str, int],
             target: int,
             value: Optional[int] = None,
             source: Optional[ActionSource] = None,
             score: Optional[int] = None,
     ):
-        self.action_type = action_type
+        self.action_type = int(action_type) if isinstance(action_type, str) else action_type
         self.target = target
         self.value = value
         self.source = source
         self.score = score
+
+    # Only compare the physical parameters. Score and source could vary
+    def __eq__(self, other):
+        return (
+            self.action_type == other.action_type
+            and self.target == other.target
+            and self.value == other.value
+        )
 
     def __str__(self):
         if self.action_type == ACTION.COLOR_CLUE:

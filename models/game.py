@@ -15,6 +15,7 @@ from services.player_finder import PlayerFinder
 if TYPE_CHECKING:
     from models.client import Client
     from models.action import Action
+    from services.game_builder import GameBuilder
 
 
 class GameException(Exception):
@@ -22,10 +23,11 @@ class GameException(Exception):
 
 
 class Game:
-    def __init__(self, client: Client):
+    def __init__(self, client: Optional[Client] = None, builder: Optional[GameBuilder] = None):
         # Meta Infos
         self.client = client
         self.table_id = None
+        self.forced_action = False
 
         # Players
         self.players = []
@@ -45,6 +47,7 @@ class Game:
         self.player_finder = PlayerFinder(self)
         self.brain = Brain(self)
         self.logger = GameLogger(self)
+        self.builder = builder
 
     def __str__(self):
         return f"Game: table_id={self.table_id}, turn_number={self.turn_number}"
@@ -52,13 +55,17 @@ class Game:
     def start(self, data):
         self.generate_players(data["playerNames"])
         self.own_index = data["ourPlayerIndex"]
-        self.table_id = data["tableID"]
+        if "tableID" in data:
+            self.table_id = data["tableID"]
+        else:
+            self.table_id = "Testing"
 
         self.suits = [0, 1, 2, 3, 4]
         self.deck = Deck(self.suits)
         self.board = Board(self, self.suits)
 
         self.brain.set_player(self.player_finder.find_self())
+        self.logger.start(data)
 
     def pretty_print(self):
         print("Players:")
@@ -84,6 +91,7 @@ class Game:
         if action_chosen.action_type in [ACTION.COLOR_CLUE, ACTION.RANK_CLUE]:
             self.brain.receive_clue(clue=action_chosen.to_clue(self))
             self.clue_tokens -= 1
+        self.logger.turn({"num": 1, "currentPlayerIndex": 1})
 
     def handle_action(self, data):
         try:
@@ -127,10 +135,18 @@ class Game:
         self.logger.save()
 
     def choose_action(self) -> Optional[Action]:
-        action = self.brain.find_action()
+        if self.forced_action:
+            action = self.get_forced_action()
+        else:
+            action = self.brain.find_action()
         self.submit_action(action)
         self.logger.action(action)
         return action
+
+    def get_forced_action(self) -> Action:
+        if not self.forced_action:
+            raise GameException("Should not force action")
+        return self.builder.get_next_action()
 
     def draw(self, data):
         player = self.get_player(data["playerIndex"])
@@ -161,7 +177,8 @@ class Game:
         card.set_rank(data["rank"])
         self.board.discard_pile.append(card)
 
-        if not data["failed"]:
+        failed = data.get('failed', False)
+        if failed:
             self.clue_tokens += 1
         self.logger.discard(data)
 
@@ -171,9 +188,22 @@ class Game:
         self.logger.clue(data)
 
     def turn(self, data):
-        self.turn_number = data["num"]
-        self.current_player_index = data["currentPlayerIndex"]
-        self.brain.display_thought(self.turn_number - 1)
+        if "num" in data:
+            self.turn_number = data["num"]
+        elif "turn_number" in data:
+            self.turn_number = data["turn_number"]
+        else:
+            raise GameException(f"No turn number in data: {data}")
+
+        if "currentPlayerIndex" in data:
+            self.current_player_index = data["currentPlayerIndex"]
+        elif "current_player_index" in data:
+            self.current_player_index = data["current_player_index"]
+        else:
+            raise GameException(f"No current player index in data: {data}")
+
+        if not self.forced_action:
+            self.brain.display_thought(self.turn_number - 1)
         self.logger.turn(data)
 
     def submit_action(self, action: Action):
@@ -186,7 +216,8 @@ class Game:
         if action.value is not None:
             body["value"] = action.value
 
-        self.client.send(
-            "action",
-            body,
-        )
+        if self.client is not None:
+            self.client.send(
+                "action",
+                body,
+            )

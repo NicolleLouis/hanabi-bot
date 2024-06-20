@@ -4,10 +4,13 @@ import json
 import os
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from models.action import Action
     from models.game import Game
+
+
+class GameLoggerException(Exception):
+    pass
 
 
 class GameLogger:
@@ -16,7 +19,8 @@ class GameLogger:
         self.logs = []
 
     def log(self, event: dict):
-        self.logs.append(event)
+        if not self.game.forced_action:
+            self.logs.append(event)
 
     @property
     def file_name(self):
@@ -24,6 +28,12 @@ class GameLogger:
 
     def ready(self):
         self.log({'game': 'ready'})
+
+    def start(self, data: dict):
+        self.log({'start': {
+            'playerNames': data['playerNames'],
+            'ourPlayerIndex': data['ourPlayerIndex'],
+        }})
 
     def action(self, action: Action):
         self.log({'action': {
@@ -57,17 +67,32 @@ class GameLogger:
         }})
 
     def clue(self, data: dict):
+        player_index = data.get('target', data.get('player_index'))
+        if "clue" in data:
+            is_color_clue = data["clue"]["type"] == 0
+            value = data["clue"]["value"]
+        else:
+            is_color_clue = data["is_color_clue"]
+            value = data["value"]
+        card_orders_touched = data.get('list', data.get('card_orders_touched'))
         self.log({'clue': {
-            'player_index': data['target'],
-            'is_color_clue': data['clue']['type'] == 0,
-            'value': data['clue']['value'],
-            'card_orders_touched': data['list']
+            'player_index': player_index,
+            'is_color_clue': is_color_clue,
+            'value': value,
+            'card_orders_touched': card_orders_touched
         }})
 
     def turn(self, data: dict):
+        turn_number = data.get('num', data.get('turn_number'))
+        if turn_number is None:
+            raise GameLoggerException(f"No turn number in data: {data}")
+        current_player_index = data.get('currentPlayerIndex', data.get('current_player_index'))
+        if current_player_index is None:
+            raise GameLoggerException(f"No current player index in data: {data}")
+
         self.log({'turn': {
-            'turn_number': data['num'],
-            'current_player_index': data['currentPlayerIndex']
+            'turn_number': turn_number,
+            'current_player_index': current_player_index
         }})
 
     def save(self):
