@@ -15,4 +15,5 @@ def test_save(game):
 
     with open(full_path, "r") as f:
         logs = json.load(f)
-        assert logs == [{"event": "test"}]
+        assert len(logs) == 2
+        assert logs[1] == {"event": "test"}

@@ -15,6 +15,8 @@ class PlayerFinder:
         self.game = game
 
     def clean_index(self, player_index):
+        if len(self.game.players) == 0:
+            raise PlayerFinderException("No players in game")
         return player_index % len(self.game.players)
 
     def find_self(self):
