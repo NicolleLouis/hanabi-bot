@@ -128,7 +128,7 @@ def test_clue_finder_rank_card(clue_finder):
     assert clue_finder.clue_score(clue) == 1
 
     player.get_card(2).computed_info.touched = True
-    assert clue_finder.clue_score(clue) == 0
+    assert clue_finder.clue_score(clue) == -1
 
 
 def test_newly_touched_cards(clue_finder):
@@ -290,3 +290,49 @@ def test_filter_valid_play_clues(clue_finder):
     clue_finder.game.board.discard_pile.append(Card(3, 1, 3))
     # The 3 is now critical, so it's seen as a save clue first and foremost
     assert clue_finder.filter_valid_play_clues([play_clue]) == []
+
+
+def test_get_player(clue_finder):
+    clue = Clue(
+        player_index=0,
+        is_color_clue=True,
+        value=1,
+        card_orders_touched=[0]
+    )
+    assert clue_finder.get_player(clue) == clue_finder.game.players[0]
+
+
+def test_is_clue_focused_on_chop(clue_finder):
+    clue = Clue(
+        player_index=0,
+        is_color_clue=True,
+        value=1,
+        card_orders_touched=[1]
+    )
+    player = clue_finder.game.players[0]
+    player.add_card_to_hand(0, 2, 2)
+    player.add_card_to_hand(1, 1, 1)
+
+    assert not clue_finder.is_clue_focused_on_chop(clue)
+
+    player.get_chop().computed_info.touched = True
+    assert clue_finder.is_clue_focused_on_chop(clue)
+
+
+def test_find_stall_clues(clue_finder):
+    other_player = clue_finder.other_players()[0]
+    other_player.add_card_to_hand(0, 1, 1)
+    other_player.add_card_to_hand(1, 1, 2)
+    other_player.add_card_to_hand(2, 1, 3)
+
+    assert clue_finder.find_stall_clues() == []
+    card = other_player.get_card(0)
+    card.computed_info.touched = True
+    assert clue_finder.find_stall_clues() == [
+        Clue(
+            player_index=other_player.index,
+            is_color_clue=True,
+            value=1,
+            card_orders_touched=[0]
+        )
+    ]

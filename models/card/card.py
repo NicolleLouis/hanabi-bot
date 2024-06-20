@@ -32,7 +32,7 @@ class Card:
 
     def __str__(self):
         color = ColorService.translate_suit(self.suit)
-        result = f"{color}{self.rank}"
+        result = f"{color} {self.rank}"
         if self.is_known:
             result = f"Known Card: {result}"
         if self.touched:

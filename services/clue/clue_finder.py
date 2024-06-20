@@ -108,7 +108,9 @@ class ClueFinder:
         valid_play_clues = []
         clue_receiver = ClueReceiver(self.game)
         for clue in clues:
-            if not clue_receiver.is_legal_save_clue(clue):
+            if not self.is_clue_focused_on_chop(clue):
+                valid_play_clues.append(clue)
+            elif not clue_receiver.is_legal_save_clue(clue):
                 valid_play_clues.append(clue)
         return valid_play_clues
 
@@ -153,8 +155,14 @@ class ClueFinder:
             card=card
         )
 
+    def get_player(self, clue) -> Player:
+        return self.game.player_finder.get_player(clue.player_index)
+
     def get_focus_clue(self, clue: Clue) -> Card:
         return ClueReceiver(self.game).find_focus(clue)
+
+    def is_clue_focused_on_chop(self, clue: Clue) -> bool:
+        return self.get_focus_clue(clue) == self.get_player(clue).get_chop()
 
     def is_card_color_focusable(self, card: Card) -> bool:
         color_clue = self.generate_clue(

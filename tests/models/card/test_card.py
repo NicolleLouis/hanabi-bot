@@ -13,7 +13,7 @@ def test_card_str():
         suit=0,
         rank=0,
     )
-    assert str(card) == "0 of 0"
+    assert str(card) == "Red 0"
 
 
 def test_update_playability_case_unknown_yet(game):
