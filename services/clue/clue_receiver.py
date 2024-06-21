@@ -22,8 +22,9 @@ class ClueReceiver:
 
     def receive_clue(self, clue: Clue) -> None:
         focus = self.find_focus(clue)
-        self.analyse_clue(clue, focus)
+        chop = self.get_player(clue).get_chop()
         self.save_clue_information(clue)
+        self.analyse_clue(clue, focus, chop)
 
     def clue_giver(self) -> Player:
         return self.game.player_finder.get_player(self.game.current_player_index)
@@ -34,8 +35,7 @@ class ClueReceiver:
     def self_player(self) -> Player:
         return self.game.player_finder.find_self()
 
-    def analyse_clue(self, clue: Clue, focus: Card) -> None:
-        chop = self.get_player(clue).get_chop()
+    def analyse_clue(self, clue: Clue, focus: Card, chop: Card) -> None:
         if focus == chop:
             self.compute_possible_save_cards(focus, clue)
         else:

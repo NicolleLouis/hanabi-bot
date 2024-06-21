@@ -123,6 +123,7 @@ class Game:
             "play": self.play,
             "discard": self.discard,
             "clue": self.clue,
+            "strike": self.strike,
             "turn": self.turn,
             "status": self.status,
             "gameOver": self.game_over,
@@ -181,6 +182,13 @@ class Game:
         if not failed:
             self.clue_tokens += 1
         self.logger.discard(data)
+
+    def strike(self, data):
+        player = self.get_player(data["num"])
+        order = data["order"]
+        card = player.remove_card_from_hand(order)
+        self.board.discard_pile.append(card)
+        self.logger.strike(data)
 
     def clue(self, data):
         self.brain.receive_clue(data=data)

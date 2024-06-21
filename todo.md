@@ -13,9 +13,3 @@ Refacto add_card_to_hand to invert suit and rank inside the parameters
 ---
 Give more weight to prompt clues
 Label those clues as prompt clues instead of play clues (Maybe direct vs prompt)
-
----
-https://hanab.live/shared-replay/1199274
-- :warning: Some issues with clue token and true in game values
-- Turn 6: Re-gave 5 clue to 2 5s already gotten? (Probably a regression, does he know they are touched?)
-- Turn 24: Re-gave purple which was already clued

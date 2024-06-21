@@ -66,6 +66,16 @@ class GameLogger:
             'suitIndex': data['suitIndex']
         }})
 
+    def strike(self, data: dict):
+        self.log(
+            {
+                'strike': {
+                    'num': data['num'],
+                    'order': data['order'],
+                }
+            }
+        )
+
     def clue(self, data: dict):
         player_index = data.get('target', data.get('player_index'))
         if "clue" in data:

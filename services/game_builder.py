@@ -75,6 +75,10 @@ class GameBuilder:
         data = next_event['discard']
         self.game.discard(data)
 
+    def build_next_strike(self, next_event: dict) -> None:
+        data = next_event['strike']
+        self.game.strike(data)
+
     def build_start(self, next_event: dict) -> None:
         data = next_event['start']
         self.game.start(data)
@@ -97,6 +101,8 @@ class GameBuilder:
             self.build_next_clue(next_event)
         elif 'discard' in next_event:
             self.build_next_discard(next_event)
+        elif 'strike' in next_event:
+            self.build_next_strike(next_event)
         else:
             raise NotImplementedError
 

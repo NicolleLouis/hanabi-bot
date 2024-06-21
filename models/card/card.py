@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from models.card.computed_info import ComputedInfo
 from models.card.known_info import KnownInfo
-from models.card.physical_card import PhysicalCard
+from models.card.physical_card import PhysicalCard, PhysicalCardException
 
 from typing import TYPE_CHECKING, Optional, List, Union
 
@@ -28,7 +28,7 @@ class Card:
         )
         self.is_known = False
         self.known_info = KnownInfo(self)
-        self.computed_info = ComputedInfo(deck=deck)
+        self.computed_info = ComputedInfo(card=self, deck=deck)
 
     def __str__(self):
         color = ColorService.translate_suit(self.suit)
@@ -87,8 +87,11 @@ class Card:
 
     def set_known(self, suit: int, rank: int):
         self.is_known = True
-        self.physical_card.set_rank(rank)
-        self.physical_card.set_suit(suit)
+        try:
+            self.physical_card.set_rank(rank)
+            self.physical_card.set_suit(suit)
+        except PhysicalCardException as e:
+            print(f"PhysicalCardException: {e}")
 
     def update_playability(self, board: Board):
         self.compute_is_known()

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 
 if TYPE_CHECKING:
+    from models.card.card import Card
     from models.board import Board
     from models.card.physical_card import PhysicalCard
     from models.card.known_info import KnownInfo
@@ -11,7 +12,8 @@ if TYPE_CHECKING:
 
 
 class ComputedInfo:
-    def __init__(self, deck: Optional[Deck] = None):
+    def __init__(self, card: Card, deck: Optional[Deck] = None):
+        self.card = card
         self.touched = False
         self.trash = False
         self.playable = False
@@ -36,11 +38,19 @@ class ComputedInfo:
     def remove_possibility(self, physical_card: PhysicalCard):
         self.possible_cards.discard(physical_card)
 
+    def fix_identity_if_single_possible_cards(self):
+        if len(self.possible_cards) != 1:
+            return
+        true_identity = list(self.possible_cards)[0]
+        self.card.set_known(suit=true_identity.suit, rank=true_identity.rank)
+
     def update_from_known_info(self, known_info: KnownInfo):
         self.update_from_negative_rank_clues(known_info)
         self.update_from_negative_suit_clues(known_info)
         self.update_from_positive_rank_clues(known_info)
         self.update_from_positive_suit_clues(known_info)
+        if len(self.possible_cards) == 1:
+            self.fix_identity_if_single_possible_cards()
 
     def update_from_negative_rank_clues(self, known_info: KnownInfo):
         for negative_rank in known_info.negative_rank_clues:
