@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, List
 
 from models.card.physical_card import PhysicalCard
 
@@ -25,6 +25,13 @@ class Stack:
 
         self.current_rank += 1
         return True
+
+    def get_missing_card_before_play(self, card: PhysicalCard) -> List[PhysicalCard]:
+        missing_cards = []
+        for rank in range(1, card.rank):
+            if rank > self.current_rank:
+                missing_cards.append(PhysicalCard(suit=self.suit, rank=rank))
+        return missing_cards
 
     def check_card_validity(self, card: PhysicalCard):
         if card.suit != self.suit:

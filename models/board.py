@@ -62,12 +62,36 @@ class Board:
 
     def get_playable_rank(self, suit: int) -> Optional[int]:
         stack = self.get_stack(suit)
-        return stack.get_playable_rank()
+        cards_gotten = self.game.brain.get_cards_gotten()
+        card_gotten_in_suit = [card for card in cards_gotten if card.suit == suit]
+        gotten_rank = [card.rank for card in card_gotten_in_suit]
+        current_playable_rank = stack.get_playable_rank()
+        if current_playable_rank is None:
+            return None
+        for _ in range(5):
+            if current_playable_rank in gotten_rank:
+                current_playable_rank += 1
+        return current_playable_rank
+
+    def get_missing_card_before_play(self, card: Union[Card, PhysicalCard]) -> List[PhysicalCard]:
+        if isinstance(card, Card):
+            card = card.physical_card
+        stack = self.get_stack(card.suit)
+        return stack.get_missing_card_before_play(card)
 
     def get_playable_suits(self, rank: int) -> Optional[List[int]]:
         playable_suits = []
+        cards_gotten = self.game.brain.get_cards_gotten()
         for stack in self.stacks:
-            if stack.is_card_valid(PhysicalCard(suit=stack.suit, rank=rank)):
+            matching_gotten_cards = [card for card in cards_gotten if card.suit == stack.suit]
+            matching_ranks = [card.rank for card in matching_gotten_cards]
+            current_playable_rank = stack.get_playable_rank()
+            if current_playable_rank is None:
+                continue
+            for _ in range(5):
+                if current_playable_rank in matching_ranks:
+                    current_playable_rank += 1
+            if rank == current_playable_rank:
                 playable_suits.append(stack.suit)
         return playable_suits
 

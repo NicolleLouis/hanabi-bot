@@ -422,3 +422,22 @@ def test_is_legal_save_rank_clue_case_3_or_4(game):
     game.board.add_card(PhysicalCard(0, 2))
     game.board.add_card(PhysicalCard(0, 3))
     assert not clue_receiver.is_legal_save_rank_clue(clue)
+
+
+def test_clue_giver(game):
+    clue_receiver = ClueReceiver(game)
+    game.current_player_index = 0
+    expected_player = game.player_finder.get_player(0)
+    assert expected_player == clue_receiver.clue_giver()
+
+
+def test_clue_receiver(game):
+    clue_receiver = ClueReceiver(game)
+    clue = Clue(
+        player_index=0,
+        is_color_clue=True,
+        value=0,
+        card_orders_touched=[0]
+    )
+    expected_player = game.player_finder.get_player(0)
+    assert expected_player == clue_receiver.clue_receiver(clue)

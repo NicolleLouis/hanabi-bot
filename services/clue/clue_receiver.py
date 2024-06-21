@@ -25,6 +25,15 @@ class ClueReceiver:
         self.analyse_clue(clue, focus)
         self.save_clue_information(clue)
 
+    def clue_giver(self) -> Player:
+        return self.game.player_finder.get_player(self.game.current_player_index)
+
+    def clue_receiver(self, clue: Clue) -> Player:
+        return self.game.player_finder.get_player(clue.player_index)
+
+    def self_player(self) -> Player:
+        return self.game.player_finder.find_self()
+
     def analyse_clue(self, clue: Clue, focus: Card) -> None:
         chop = self.get_player(clue).get_chop()
         if focus == chop:
@@ -36,12 +45,20 @@ class ClueReceiver:
         if clue.is_color_clue:
             self.compute_possible_play_color_clue(card, clue)
         else:
+            if self.self_player() not in [self.clue_receiver(clue), self.clue_giver()]:
+                self.compute_own_hand_consequences(card, clue)
             self.compute_possible_play_rank_clue(card, clue)
+
+    # For now it's only play clues so the card is promised playable.
+    # So we have to dig for the missing ones.
+    def compute_own_hand_consequences(self, card: Card, clue: Clue):
+        missing_cards = self.game.board.get_missing_card_before_play(card)
 
     def compute_possible_play_color_clue(self, card: Card, clue: Clue):
         playable_rank = self.game.board.get_playable_rank(clue.value)
         if playable_rank is None:
             print("Did not understand this play clue")
+            print(f"Clue receiver: {self.clue_receiver(clue).name}")
             return
         card.set_known(suit=clue.value, rank=playable_rank)
         card.computed_info.playable = True
@@ -50,6 +67,7 @@ class ClueReceiver:
         playable_suits = self.game.board.get_playable_suits(clue.value)
         if len(playable_suits) == 0:
             print("Did not understand this play clue")
+            print(f"Clue receiver: {self.clue_receiver(clue).name}")
             return
         if len(playable_suits) == 1:
             card.set_known(suit=playable_suits[0], rank=clue.value)

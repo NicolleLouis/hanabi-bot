@@ -41,7 +41,7 @@ class Card:
 
     def pretty_print(self) -> None:
         if self.is_known:
-            print(f"Known Card: {self.rank} of {self.suit}")
+            print(f"{str(self)}")
             return
 
         print("Unknown Card: ")
