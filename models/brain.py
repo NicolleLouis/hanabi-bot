@@ -72,6 +72,7 @@ class Brain:
     def find_play_actions(self) -> List[Action]:
         play_actions = []
         for card in self.player.hand:
+            card.update_playability(self.game.board)
             if card.computed_info.playable:
                 play_actions.append(self.play_service.to_card(card, 2))
         return play_actions

@@ -162,6 +162,8 @@ class ClueFinder:
         return ClueReceiver(self.game).find_focus(clue)
 
     def is_clue_focused_on_chop(self, clue: Clue) -> bool:
+        if self.get_player(clue).get_chop() is None:
+            return False
         return self.get_focus_clue(clue) == self.get_player(clue).get_chop()
 
     def is_card_color_focusable(self, card: Card) -> bool:
