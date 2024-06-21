@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
+    from models.card.physical_card import PhysicalCard
     from models.card.card import Card
 
 
@@ -64,3 +66,10 @@ class KnownInfo:
 
     def update_computed_infos(self):
         self.card.computed_info.update_from_known_info(self)
+
+    def match_positive_clue(self, physical_card: PhysicalCard):
+        if physical_card.rank in self.positive_rank_clues:
+            return True
+        if physical_card.suit in self.positive_suit_clues:
+            return True
+        return False

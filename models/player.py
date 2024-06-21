@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import List, TYPE_CHECKING, Optional
 
+
 if TYPE_CHECKING:
+    from models.card.physical_card import PhysicalCard
     from models.deck import Deck
 
 from models.card.card import Card
@@ -34,6 +36,10 @@ class Player:
     @property
     def touched_cards(self) -> List[Card]:
         return [card for card in self.hand if card.touched]
+
+    @property
+    def known_cards(self) -> List[Card]:
+        return [card for card in self.hand if card.is_known]
 
     @property
     def unclued_cards(self) -> List[Card]:
@@ -80,5 +86,5 @@ class Player:
         )
         self.hand.append(card)
 
-    def has_card(self, card: Card):
-        return len([c for c in self.hand if c.order == card.order]) > 0
+    def has_physical_card(self, physical_card: PhysicalCard) -> bool:
+        return len([card for card in self.hand if card.physical_card == physical_card]) > 0

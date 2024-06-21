@@ -1,10 +1,12 @@
 from unittest.mock import patch
 
+import pytest
+
 from models.card.card import Card
 from models.card.physical_card import PhysicalCard
 from models.clue import Clue
 from services.card import CardService
-from services.clue.clue_receiver import ClueReceiver
+from services.clue.clue_receiver import ClueReceiver, ClueReceiverException
 
 
 def test_focus_single_touched_card_case(game):
@@ -145,8 +147,9 @@ def test_compute_possible_play_cards_case_color_clue_unsuccessful(game):
 
 def test_compute_possible_play_cards_case_rank_clue_successful(game):
     card = Card(0, -1, -1, game.deck)
+    player = game.player_finder.find_self()
     clue = Clue(
-        player_index=0,
+        player_index=player.index,
         is_color_clue=False,
         value=1,
         card_orders_touched=[0]
@@ -171,8 +174,9 @@ def test_compute_possible_play_cards_case_rank_clue_successful(game):
 
 def test_compute_possible_play_cards_case_rank_clue_unsuccessful(game):
     card = Card(0, -1, -1, game.deck)
+    player = game.player_finder.find_self()
     clue = Clue(
-        player_index=0,
+        player_index=player.index,
         is_color_clue=False,
         value=1,
         card_orders_touched=[0]
@@ -441,3 +445,73 @@ def test_clue_receiver(game):
     )
     expected_player = game.player_finder.get_player(0)
     assert expected_player == clue_receiver.clue_receiver(clue)
+
+
+def test_promise_playable_card_in_hand(game):
+    clue_receiver = ClueReceiver(game)
+    # Player Hand is R2, R3, R4, R5, R1
+    player = game.player_finder.find_self()
+    player.add_card_to_hand(0, -1, -1, game.deck)
+    player.add_card_to_hand(1, -1, -1, game.deck)
+    player.add_card_to_hand(2, -1, -1, game.deck)
+    player.add_card_to_hand(3, -1, -1, game.deck)
+    player.add_card_to_hand(4, -1, -1, game.deck)
+
+    # No cards touched so promise is impossible (until finesse)
+    with pytest.raises(ClueReceiverException):
+        clue_receiver.promise_playable_card_in_hand(PhysicalCard(0, 1))
+
+    # Touch all cards with a red clue
+    clue_receiver.receive_clue(Clue(
+        player_index=player.index,
+        is_color_clue=True,
+        value=0,
+        card_orders_touched=[0, 1, 2, 3, 4]
+    ))
+    chop = player.get_card_by_slot(5)
+    assert chop.is_known
+    assert chop.rank == 1
+
+    # Promise a already clued card so no more promises
+    clue_receiver.promise_playable_card_in_hand(PhysicalCard(0, 1))
+    slot_1 = player.get_card_by_slot(1)
+    assert not slot_1.is_known
+    assert slot_1.rank == -1
+
+    # Promise a card that is not in hand yet
+    clue_receiver.promise_playable_card_in_hand(PhysicalCard(0, 2))
+    assert slot_1.is_known
+    assert slot_1.rank == 2
+
+
+def test_compute_own_hand_consequences(game):
+    clue_receiver = ClueReceiver(game)
+    player = game.player_finder.find_self()
+    other_player = game.brain.other_players()[0]
+    other_player.add_card_to_hand(0, -1, -1, game.deck)
+    clue = Clue(
+            player_index=other_player.index,
+            is_color_clue=True,
+            value=2,
+            card_orders_touched=[0]
+        )
+    clued_card = other_player.get_card(0)
+
+    # Card is not known so it should raise an exception
+    with pytest.raises(ClueReceiverException):
+        clue_receiver.compute_own_hand_consequences(clued_card, clue)
+
+    clued_card.set_known(suit=0, rank=2)
+    # No legal target in player hand
+    with pytest.raises(ClueReceiverException):
+        clue_receiver.compute_own_hand_consequences(clued_card, clue)
+
+    player.add_card_to_hand(1, -1, -1, game.deck)
+    card = player.get_card(1)
+    card.set_touched(True)
+    card.known_info.add_positive_clue(True, 0)
+    clue_receiver.compute_own_hand_consequences(clued_card, clue)
+    assert card.is_known
+    assert card.suit == 0
+    assert card.rank == 1
+    assert card.playable

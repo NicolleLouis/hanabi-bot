@@ -42,17 +42,38 @@ class ClueReceiver:
             self.compute_possible_play_cards(focus, clue)
 
     def compute_possible_play_cards(self, card: Card, clue: Clue):
+        if self.self_player() not in [self.clue_receiver(clue), self.clue_giver()]:
+            self.compute_own_hand_consequences(card, clue)
+
         if clue.is_color_clue:
             self.compute_possible_play_color_clue(card, clue)
         else:
-            if self.self_player() not in [self.clue_receiver(clue), self.clue_giver()]:
-                self.compute_own_hand_consequences(card, clue)
             self.compute_possible_play_rank_clue(card, clue)
 
     # For now it's only play clues so the card is promised playable.
     # So we have to dig for the missing ones.
-    def compute_own_hand_consequences(self, card: Card, clue: Clue):
+    # Card is the focus of the play clue
+    def compute_own_hand_consequences(self, card: Card, _clue: Clue):
+        if not card.physical_card.is_known():
+            raise ClueReceiverException("It's another player's card so it should be known.")
         missing_cards = self.game.board.get_missing_card_before_play(card)
+        gotten_cards = self.game.brain.get_cards_gotten()
+        for card in missing_cards:
+            if card not in gotten_cards:
+                self.promise_playable_card_in_hand(card)
+
+    def promise_playable_card_in_hand(self, physical_card: PhysicalCard):
+        player = self.self_player()
+        if player.has_physical_card(physical_card):
+            return
+
+        matching_cards = [card for card in player.touched_cards if card.known_info.match_positive_clue(physical_card)]
+        matching_cards = [card for card in matching_cards if not card.is_known]
+        if len(matching_cards) == 0:
+            raise ClueReceiverException("Card Promised but no legal target")
+        matching_card = matching_cards[-1]
+        matching_card.set_known(suit=physical_card.suit, rank=physical_card.rank)
+        matching_card.set_playable(True)
 
     def compute_possible_play_color_clue(self, card: Card, clue: Clue):
         playable_rank = self.game.board.get_playable_rank(clue.value)

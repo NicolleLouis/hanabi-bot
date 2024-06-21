@@ -1,6 +1,7 @@
 import pytest
 
 from models.card.known_info import KnownInfo, KnownInfoException
+from models.card.physical_card import PhysicalCard
 
 
 def test_add_positive_clue(card):
@@ -52,3 +53,15 @@ def test_sanity_rank_issue(card):
     known_info.negative_rank_clues = [1]
     with pytest.raises(KnownInfoException):
         known_info.check_sanity()
+
+
+def test_match_positive_clue(card_factory):
+    card_1 = card_factory()
+    card_1.known_info.add_positive_clue(is_color_clue=True, value=card_1.suit)
+    assert card_1.known_info.match_positive_clue(PhysicalCard(card_1.suit, 1))
+    assert not card_1.known_info.match_positive_clue(PhysicalCard(card_1.suit + 1, card_1.rank))
+
+    card_2 = card_factory()
+    card_2.known_info.add_positive_clue(is_color_clue=False, value=card_2.rank)
+    assert card_2.known_info.match_positive_clue(PhysicalCard(1, card_2.rank))
+    assert not card_2.known_info.match_positive_clue(PhysicalCard(card_2.suit, card_2.rank + 1))

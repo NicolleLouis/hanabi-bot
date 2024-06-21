@@ -21,11 +21,11 @@ def test_turn_23(client):
         Card(3, 3, 4, game.deck),
     ]
     la_fayette_bot_1.hand = [
-        Card(4, 4, 5, game.deck),
-        Card(5, 0, 4, game.deck),
-        Card(6, 1, 2, game.deck),
-        Card(7, 3, 4, game.deck),
-        Card(8, 0, 3, game.deck),
+        Card(4, -1, -1, game.deck),
+        Card(5, -1, -1, game.deck),
+        Card(6, -1, -1, game.deck),
+        Card(7, -1, -1, game.deck),
+        Card(8, -1, -1, game.deck),
     ]
     first_clue = Clue(
         player_index=1,
@@ -40,7 +40,7 @@ def test_turn_23(client):
         value=4,
         card_orders_touched=[5, 7],
     )
+    focused_card = la_fayette_bot_1.get_card(5)
     game.brain.receive_clue(clue=second_clue)
 
-    focused_card = la_fayette_bot_1.get_card(5)
     assert len(focused_card.computed_info.possible_cards) == 3

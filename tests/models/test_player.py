@@ -1,5 +1,6 @@
 import pytest
 
+from models.card.physical_card import PhysicalCard
 from models.player import Player, PlayerException
 
 
@@ -87,3 +88,16 @@ def test_get_finesse():
     finesse_card.known_info.add_positive_clue(True, 1)
     new_finesse_card = player.get_card(2)
     assert player.get_finesse() == new_finesse_card
+
+
+def test_has_physical_card():
+    player = Player("Louis", 0)
+    player.add_card_to_hand(0, 1, 1)
+    player.add_card_to_hand(1, 3, 1)
+    player.add_card_to_hand(2, 1, 2)
+    player.add_card_to_hand(3, 4, 1)
+    player.add_card_to_hand(4, 4, 1)
+
+    assert player.has_physical_card(PhysicalCard(1, 1))
+    assert player.has_physical_card(PhysicalCard(1, 4))
+    assert not player.has_physical_card(PhysicalCard(1, 0))

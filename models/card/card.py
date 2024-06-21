@@ -55,12 +55,6 @@ class Card:
     def suit(self):
         return self.physical_card.suit
 
-    def set_suit(self, suit):
-        self.physical_card.suit = suit
-
-    def set_rank(self, rank):
-        self.physical_card.rank = rank
-
     def __eq__(self, other):
         return self.physical_card == other.physical_card and self.order == other.order
 
@@ -78,6 +72,9 @@ class Card:
     def set_trash(self, trash: bool) -> None:
         self.computed_info.trash = trash
 
+    def set_touched(self, touched: bool) -> None:
+        self.computed_info.touched = touched
+
     @property
     def trash(self):
         return self.computed_info.trash
@@ -90,8 +87,8 @@ class Card:
 
     def set_known(self, suit: int, rank: int):
         self.is_known = True
-        self.set_rank(rank)
-        self.set_suit(suit)
+        self.physical_card.set_rank(rank)
+        self.physical_card.set_suit(suit)
 
     def update_playability(self, board: Board):
         self.compute_is_known()

@@ -162,8 +162,8 @@ class Game:
         player = self.get_player(data["playerIndex"])
         order = data["order"]
         card = player.remove_card_from_hand(order)
-        card.set_suit(data["suitIndex"])
-        card.set_rank(data["rank"])
+        card.physical_card.set_suit(data["suitIndex"])
+        card.physical_card.set_rank(data["rank"])
         success = self.board.add_card(card.physical_card)
         if success and card.rank == 5:
             self.clue_tokens += 1
@@ -173,8 +173,8 @@ class Game:
         player = self.get_player(data["playerIndex"])
         order = data["order"]
         card = player.remove_card_from_hand(order)
-        card.set_suit(data["suitIndex"])
-        card.set_rank(data["rank"])
+        card.physical_card.set_suit(data["suitIndex"])
+        card.physical_card.set_rank(data["rank"])
         self.board.discard_pile.append(card)
 
         failed = data.get('failed', False)

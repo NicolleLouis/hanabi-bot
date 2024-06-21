@@ -153,7 +153,9 @@ class Brain:
         touched_cards = []
         for player in self.other_players():
             touched_cards.extend([card.physical_card for card in player.touched_cards])
-        return played_cards + touched_cards
+        known_cards = self.player.known_cards
+        known_physical_cards = [card.physical_card for card in known_cards]
+        return played_cards + touched_cards + known_physical_cards
 
     def good_touch_elimination(self):
         cards_gotten = self.get_cards_gotten()
